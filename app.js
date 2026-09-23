@@ -831,21 +831,88 @@ async function publishToGitHub(token, batch, { onAttempt } = {}) {
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (onAttempt) onAttempt(attempt);
+
+    // Work directly from the published JSON. This is important for Add/Delete:
+    // a newly-added local dish may not exist remotely yet, while a deleted dish
+    // must be removed from the remote array. Inferring those operations from
+    // local state can otherwise make the operation undo itself during a sync.
     const remote = await fetchRepoMenuFile(token);
-    const base = remote.data ? stateFromItems(remote.data.items, remote.data.updatedAt) : loadState();
-    const next = applyPatch(base, batch);
+    const remoteItems = remote.data && Array.isArray(remote.data.items) ? remote.data.items : [];
+    const currentState = loadState();
+    const byId = new Map();
+
+    remoteItems.forEach(item => {
+      const id = Number(item && item.id);
+      if (Number.isFinite(id)) byId.set(id, Object.assign({}, item, { id }));
+    });
+
+    Object.keys(batch || {}).forEach(key => {
+      const id = Number(key);
+      const change = batch[key] || {};
+      if (!Number.isFinite(id) || !DISH_BY_ID.has(id)) return;
+
+      if (change.deleted === true) {
+        byId.delete(id);
+        return;
+      }
+
+      const dish = DISH_BY_ID.get(id);
+      const existing = byId.get(id) || {
+        id: dish.id,
+        name: dish.name,
+        category: dish.category,
+        price: currentState.prices[id] ?? dish.price,
+        description: dish.description,
+        veg: dish.veg !== false,
+        available: currentState.availability[id] !== false
+      };
+
+      existing.name = dish.name;
+      existing.category = dish.category;
+      existing.description = dish.description;
+      existing.veg = dish.veg !== false;
+
+      if (Number.isFinite(change.price) && change.price >= 0) {
+        existing.price = Math.round(change.price);
+      } else if (!Number.isFinite(Number(existing.price))) {
+        existing.price = currentState.prices[id] ?? dish.price;
+      }
+
+      if (typeof change.available === "boolean") {
+        existing.available = change.available;
+      } else if (typeof existing.available !== "boolean") {
+        existing.available = currentState.availability[id] !== false;
+      }
+
+      byId.set(id, existing);
+    });
+
+    const publishedItems = Array.from(byId.values());
     const remoteTime = remote.data ? parseTime(remote.data.updatedAt) : 0;
-    next.updatedAt = new Date(Math.max(Date.now(), remoteTime + 1000)).toISOString();
-    const payload = { version: 1, updatedAt: next.updatedAt, items: itemsFromState(next) };
-    const body = { message: commitMessage(batch), content: utf8ToBase64(JSON.stringify(payload, null, 2) + "\n"), branch: CONFIG.branch };
+    const updatedAt = new Date(Math.max(Date.now(), remoteTime + 1000)).toISOString();
+    const payload = { version: 1, updatedAt, items: publishedItems };
+    const body = {
+      message: commitMessage(batch),
+      content: utf8ToBase64(JSON.stringify(payload, null, 2) + "\n"),
+      branch: CONFIG.branch
+    };
     if (remote.sha) body.sha = remote.sha;
+
     try {
-      const res = await ghFetch(contentsUrl(), token, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await ghFetch(contentsUrl(), token, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
       const result = await res.json().catch(() => ({}));
-      return { state: next, commitSha: result && result.commit ? result.commit.sha : "", commitUrl: result && result.commit ? result.commit.html_url : "" };
+      return {
+        state: stateFromItems(publishedItems, updatedAt),
+        commitSha: result && result.commit ? result.commit.sha : "",
+        commitUrl: result && result.commit ? result.commit.html_url : ""
+      };
     } catch (err) {
       lastError = err;
-      if (err.status === 409 || err.status === 422) continue; // someone else committed in between → re-read and retry
+      if (err.status === 409 || err.status === 422) continue;
       throw err;
     }
   }

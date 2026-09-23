@@ -410,14 +410,20 @@ async function ghFetch(url, token, options = {}) {
   if (!res.ok) throw await githubError(res);
   return res;
 }
+// Checks that the token is valid and can see the repository. Write access is
+// confirmed by the first publish (a clear error is shown if it is missing).
 async function verifyToken(token) {
-  const user = await (await ghFetch(CONFIG.apiBase + "/user", token)).json();
-  // A fine-grained token without access to the repository gets a 404 here.
-  const repo = await (await ghFetch(CONFIG.apiBase + "/repos/" + CONFIG.repo, token)).json();
-  if (repo && repo.permissions && repo.permissions.push === false) {
-    throw new PublishError("This account cannot push to " + CONFIG.repo + ". Use a token from the repository owner or a collaborator with write access.", { status: 403, auth: true });
+  let login = "";
+  try {
+    const user = await (await ghFetch(CONFIG.apiBase + "/user", token)).json();
+    login = user.login || "";
+  } catch (err) {
+    if (err.status === 401 || err.retryable) throw err; // invalid token / no network
+    // other token types (e.g. GitHub App tokens) cannot call /user – fine.
   }
-  return user.login || "";
+  // A fine-grained token without access to the repository gets a 404 here.
+  await ghFetch(CONFIG.apiBase + "/repos/" + CONFIG.repo, token);
+  return login;
 }
 async function fetchRepoMenuFile(token) {
   const res = await ghFetch(contentsUrl() + "?ref=" + encodeURIComponent(CONFIG.branch), token).catch(err => {

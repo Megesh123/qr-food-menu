@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spice Street - Admin</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar admin-topbar">
+    <div>
+      <p class="eyebrow">RESTAURANT ADMIN</p>
+      <h1>Spice Street</h1>
+      <p class="sub">Manage food availability</p>
+    </div>
+    <a class="admin-link" href="index.html">Customer View</a>
+  </header>
+  <main class="container admin-container">
+    <section class="admin-summary">
+      <div><strong id="availableCount">0</strong><span>Available</span></div>
+      <div><strong id="soldOutCount">0</strong><span>Sold out</span></div>
+      <button id="resetBtn" class="secondary-btn">Reset All</button>
+    </section>
+    <div class="notice"><strong>Demo mode</strong><span>Changes are saved in this browser only.</span></div>
+    <section id="adminMenu" class="admin-list"></section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

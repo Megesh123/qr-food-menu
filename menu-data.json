@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T12:03:37.235Z",
+  "updatedAt": "2026-09-23T12:27:15.924Z",
   "items": [
     {
       "id": 1,
@@ -45,7 +45,7 @@
       "price": 120,
       "description": "Aromatic rice with tender mushrooms and herbs.",
       "veg": true,
-      "available": false
+      "available": true
     },
     {
       "id": 6,

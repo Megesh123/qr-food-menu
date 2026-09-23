@@ -3,32 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title>Spice Street - Digital Menu</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=14">
-  <link rel="stylesheet" href="styles.css?v=14">
+  <!-- This file only forwards to the canonical customer menu at /customer, so
+       the two copies can never drift apart again. Old QR codes keep working. -->
+  <link rel="canonical" href="https://menu.nexgenlink.co.in/customer">
+  <meta http-equiv="refresh" content="0; url=customer">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=15">
+  <link rel="stylesheet" href="styles.css?v=15">
+  <script>location.replace("customer" + location.search + location.hash);</script>
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">DIGITAL MENU</p>
-      <h1>Spice Street</h1>
-      <p class="sub">Fresh food • Updated live</p>
-    </div>
-    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button>
-  </header>
-  <main class="container">
-    <section class="hero">
-      <div><span class="status-dot"></span><strong>Today's menu</strong></div>
-      <p>Choose a category and check live availability before ordering.</p>
-      <small id="menuUpdated" class="menu-updated"></small>
-    </section>
-    <div class="legend">
-      <span><i class="available"></i> Available</span>
-      <span><i class="unavailable"></i> Sold out</span>
-    </div>
-    <section id="menu" class="menu-sections"><p class="menu-loading">Loading today’s menu…</p></section>
+  <main class="container redirect-card">
+    <p class="eyebrow">DIGITAL MENU</p>
+    <h1>Spice Street</h1>
+    <p>Opening today’s menu…</p>
+    <div class="notfound-actions"><a class="primary-btn" href="customer">Continue to the menu →</a></div>
   </main>
-  <footer><p>Scan • Choose • Enjoy</p><small>Powered by your digital menu</small></footer>
-  <script src="app.js?v=14"></script>
 </body>
 </html>

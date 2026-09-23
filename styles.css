@@ -86,3 +86,45 @@ body.light.landing-page{background:radial-gradient(circle at 50% -10%,#fff 0,#f7
 .menu-updated{display:block;margin-top:8px;color:var(--muted);font-size:11px}
 .menu-updated:empty{display:none}
 .menu-loading{color:var(--muted);font-size:13px;text-align:center;padding:36px 0}
+
+/* Customer menu: search, diet filter, category jump ----------------------- */
+.menu-tools{position:sticky;top:0;z-index:6;background:var(--bg);padding:6px 0 12px;margin:0 0 4px}
+.search-field{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 13px}
+.search-field:focus-within{border-color:var(--muted)}
+.search-icon{flex:0 0 auto;font-size:14px;opacity:.65}
+#menuSearch{flex:1 1 auto;min-width:0;border:0;background:transparent;color:var(--text);font:inherit;font-size:15px;padding:2px 0;outline:none;-webkit-appearance:none;appearance:none}
+#menuSearch::placeholder{color:var(--muted)}
+#menuSearch::-webkit-search-cancel-button,#menuSearch::-webkit-search-decoration{-webkit-appearance:none;appearance:none}
+.search-clear{flex:0 0 auto;width:24px;height:24px;border:0;border-radius:50%;background:var(--chip);color:var(--muted);font:inherit;font-size:11px;line-height:1;cursor:pointer}
+.search-clear:hover{color:var(--text)}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:7px 13px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s ease}
+.chip:hover{color:var(--text);border-color:var(--muted)}
+.chip.is-active{background:var(--text);border-color:var(--text);color:var(--bg)}
+.chip.is-active .diet-mark{border-color:currentColor}
+.chip.is-active .diet-mark::after{background:currentColor}
+.chip-cat{padding:7px 11px}
+/* FSSAI-style veg / non-veg marker */
+.diet-mark{flex:0 0 auto;width:13px;height:13px;border:1.5px solid var(--green);border-radius:3px;display:inline-grid;place-items:center}
+.diet-mark::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--green)}
+.diet-mark.nonveg{border-color:var(--red)}
+.diet-mark.nonveg::after{background:var(--red)}
+.menu-card .category{display:flex;align-items:center;gap:6px}
+.menu-count{margin:12px 2px 0;color:var(--muted);font-size:11px;font-weight:600}
+.menu-count:empty{display:none}
+mark{background:var(--green-bg);color:var(--green);border-radius:4px;padding:0 2px}
+.menu-empty{text-align:center;padding:48px 22px;background:var(--card);border:1px solid var(--line);border-radius:18px}
+.menu-empty p{margin:0;font-size:30px}
+.menu-empty strong{display:block;margin:14px 0 6px;font-size:17px}
+.menu-empty span{display:block;color:var(--muted);font-size:13px;line-height:1.5}
+.menu-empty-btn{margin-top:18px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:11px;padding:10px 15px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.menu-empty-btn:hover{border-color:var(--muted)}
+.category-section{scroll-margin-top:190px}
+@media(max-width:620px){.menu-tools{padding:6px 0 10px}.chip{font-size:11px;padding:6px 11px}.category-section{scroll-margin-top:150px}}
+
+/* Redirect stubs (/admin.html, /customer.html) and the 404 page ----------- */
+.redirect-card,.notfound-card{text-align:center;padding:70px 22px}
+.redirect-card h1,.notfound-card h1{margin:6px 0 10px;font-size:clamp(30px,8vw,44px);letter-spacing:-1px}
+.redirect-card p,.notfound-text{color:var(--muted);font-size:14px;line-height:1.6;max-width:420px;margin:0 auto}
+.notfound-card .big{font-size:clamp(64px,18vw,110px);line-height:1;letter-spacing:-4px;margin:10px 0 6px}
+.notfound-actions{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;margin-top:26px}

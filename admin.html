@@ -3,55 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title>Spice Street - Admin</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=14">
-  <link rel="stylesheet" href="styles.css?v=14">
+  <!-- Forwards to the canonical dashboard at /admin. Keeping this as a stub
+       means the admin markup exists in exactly one place (/admin/index.html),
+       and the page is no longer indexable as a duplicate. -->
+  <meta http-equiv="refresh" content="0; url=admin">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=15">
+  <link rel="stylesheet" href="styles.css?v=15">
+  <script>location.replace("admin" + location.search + location.hash);</script>
 </head>
 <body class="admin-page">
-  <header class="topbar admin-topbar">
-    <div>
-      <p class="eyebrow">RESTAURANT ADMIN</p>
-      <h1>Spice Street</h1>
-      <p class="sub">Manage availability & menu pricing</p>
-    </div>
-    <div class="top-actions"><a class="admin-link" href="customer">Customer View</a><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button></div>
-  </header>
-  <section id="adminLogin" class="login-screen"><div class="login-card"><div class="login-logo">🍽️</div><p class="eyebrow">SPICE STREET</p><h2>Restaurant Admin</h2><p class="login-sub">Sign in to manage today’s menu availability.</p><form id="loginForm"><label>Username<input id="loginUsername" type="text" autocomplete="username" required></label><label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="login-btn" type="submit">Sign in</button><p id="loginError" class="login-error"></p></form><small class="test-note">Testing login: admin / admin</small></div></section><main id="adminApp" class="container admin-container" hidden>
-    <section id="syncPanel" class="sync-panel">
-      <div class="sync-row">
-        <span id="syncDot" class="sync-dot off" aria-hidden="true"></span>
-        <div class="sync-text" aria-live="polite">
-          <strong id="syncTitle">Checking GitHub connection…</strong>
-          <span id="syncDetail">Price and availability changes are published to GitHub automatically.</span>
-        </div>
-        <div class="sync-actions">
-          <button id="syncRetryBtn" class="sync-btn primary" type="button" hidden>Retry</button>
-          <button id="syncSettingsBtn" class="sync-btn" type="button" aria-controls="syncSettings" aria-expanded="false">GitHub settings</button>
-        </div>
-      </div>
-      <div id="syncSettings" class="sync-settings" hidden>
-        <p class="sync-help">Every change you make here is committed to <code>menu-data.json</code> in <a href="https://github.com/Megesh123/qr-food-menu" target="_blank" rel="noopener">Megesh123/qr-food-menu</a>, and GitHub Pages republishes the customer menu. To allow that, paste a GitHub <strong>fine-grained personal access token</strong> once. It is stored only in this browser.</p>
-        <ol class="sync-steps">
-          <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create a token ↗</a> — Repository access: <em>Only select repositories → qr-food-menu</em>.</li>
-          <li>Permissions → Repository permissions → <em>Contents: Read and write</em>.</li>
-          <li>Generate the token, copy it and paste it below.</li>
-        </ol>
-        <form id="tokenForm" class="token-form" autocomplete="off">
-          <input id="tokenInput" type="password" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="GitHub token">
-          <button id="connectBtn" class="sync-btn primary" type="submit">Connect</button>
-          <button id="disconnectBtn" class="sync-btn" type="button" hidden>Disconnect</button>
-        </form>
-        <p id="tokenMessage" class="sync-message" role="status"></p>
-        <button id="discardBtn" class="link-btn" type="button" hidden>Discard unpublished changes</button>
-      </div>
-    </section>
-    <section class="admin-summary">
-      <div><strong id="availableCount">0</strong><span>Available</span></div>
-      <div><strong id="soldOutCount">0</strong><span>Sold out</span></div>
-      <button id="resetBtn" class="secondary-btn">Reset All</button>
-    </section>
-    <section id="adminMenu" class="admin-list"></section>
+  <main class="container redirect-card">
+    <p class="eyebrow">RESTAURANT ADMIN</p>
+    <h1>Spice Street</h1>
+    <p>Opening the admin dashboard…</p>
+    <div class="notfound-actions"><a class="primary-btn" href="admin">Continue to the dashboard →</a></div>
   </main>
-  <script src="app.js?v=14"></script>
 </body>
 </html>

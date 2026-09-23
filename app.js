@@ -10,6 +10,8 @@ function toggleTheme(){const next=document.body.classList.contains("light")?"dar
 const themeToggle=document.getElementById("themeToggle");
 if(themeToggle)themeToggle.addEventListener("click",toggleTheme);
 applyTheme();
+window.addEventListener("pageshow", applyTheme);
+window.addEventListener("storage", (event)=>{ if(event.key===THEME_KEY) applyTheme(); });
 
 const ADMIN_SESSION="spice-street-admin-session";
 const adminLogin=document.getElementById("adminLogin");

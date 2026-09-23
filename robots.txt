@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Sitemap: https://menu.nexgenlink.co.in/sitemap.xml

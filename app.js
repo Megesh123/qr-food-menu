@@ -111,6 +111,32 @@ const DISHES = [
 {id:62,name:"Masala Tea",category:"Drinks",price:30,description:"Hot Indian tea brewed with aromatic spices.",veg:true}
 ];
 const DISH_BY_ID = new Map(DISHES.map(d => [d.id, d]));
+const CUSTOM_DISHES_KEY = "spice-street-custom-dishes-v1";
+const ANALYTICS_CONFIG_PATH = "analytics-config.json";
+let analyticsConfig = { provider: "goatcounter", code: "" };
+function persistCustomDish(dish) {
+  const list = readJSON(localStorage, CUSTOM_DISHES_KEY, []) || [];
+  if (!list.some(x => Number(x.id) === Number(dish.id))) list.push(dish);
+  writeJSON(localStorage, CUSTOM_DISHES_KEY, list);
+}
+function ensureDish(item) {
+  const id = Number(item && item.id);
+  if (!id || DISH_BY_ID.has(id)) return DISH_BY_ID.get(id);
+  const name = String(item.name || "").trim();
+  const category = String(item.category || "Other").trim() || "Other";
+  const price = Number(item.price);
+  if (!name || !Number.isFinite(price) || price < 0) return null;
+  const dish = { id, name, category, price: Math.round(price), description: String(item.description || ""), veg: item.veg !== false };
+  DISHES.push(dish);
+  DISH_BY_ID.set(id, dish);
+  persistCustomDish(dish);
+  return dish;
+}
+function loadCustomDishes() {
+  const list = readJSON(localStorage, CUSTOM_DISHES_KEY, []) || [];
+  list.forEach(ensureDish);
+}
+loadCustomDishes();
 
 /* ---------------------------------------------------------- Configuration */
 // sha256("admin:admin") — the default admin credential (see "Admin sign-in").
@@ -143,6 +169,10 @@ const CONFIG = Object.assign({
 const PUBLISHED_MENU_URL = (() => {
   try { return new URL(CONFIG.dataPath, document.currentScript.src).href; }
   catch (e) { return "/" + CONFIG.dataPath; }
+})();
+const ANALYTICS_CONFIG_URL = (() => {
+  try { return new URL(ANALYTICS_CONFIG_PATH, document.currentScript.src).href; }
+  catch (e) { return "/" + ANALYTICS_CONFIG_PATH; }
 })();
 
 const MENU_STATE_KEY = "spice-street-menu-state-v3";      // cached menu (all pages)
@@ -209,6 +239,7 @@ function normalizeState(raw) {
   return state;
 }
 function stateFromItems(items, updatedAt) {
+  (items || []).forEach(item => { ensureDish(item); });
   const state = defaultState();
   (items || []).forEach(item => {
     const id = Number(item && item.id);
@@ -881,6 +912,76 @@ const publisher = {
 };
 
 /* ------------------------------------------------------- Admin actions */
+function nextDishId() {
+  return DISHES.reduce((max, d) => Math.max(max, Number(d.id) || 0), 0) + 1;
+}
+function addDish({ name, category, price, description, veg }) {
+  name = String(name || "").trim();
+  category = String(category || "Other").trim() || "Other";
+  description = String(description || "").trim();
+  price = Math.round(Number(price));
+  if (!name || !Number.isFinite(price) || price < 0) return { ok: false, error: "Enter a valid dish name and price." };
+  const id = nextDishId();
+  const dish = { id, name, category, price, description, veg: veg !== false };
+  DISHES.push(dish);
+  DISH_BY_ID.set(id, dish);
+  persistCustomDish(dish);
+  const state = loadState();
+  state.availability[id] = true;
+  state.prices[id] = price;
+  saveState(state);
+  publisher.addPending({ [id]: { available: true, price } });
+  renderAll();
+  publisher.schedule();
+  return { ok: true, dish };
+}
+async function fetchAnalyticsConfig() {
+  try {
+    const url = ANALYTICS_CONFIG_URL + (ANALYTICS_CONFIG_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return analyticsConfig;
+    const data = await res.json();
+    if (data && typeof data.code === "string") analyticsConfig = { provider: "goatcounter", code: data.code.trim() };
+  } catch (e) {}
+  return analyticsConfig;
+}
+function analyticsCode() { return String(analyticsConfig.code || "").trim(); }
+function analyticsCounterUrl(startDate) {
+  const code = analyticsCode();
+  if (!code) return "";
+  return "https://" + code + ".goatcounter.com/counter/" + encodeURIComponent("/customer/") + ".json?start=" + encodeURIComponent(startDate);
+}
+function isoDateDaysAgo(days) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+async function fetchVisitCount(days) {
+  const url = analyticsCounterUrl(isoDateDaysAgo(days));
+  if (!url) return null;
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const value = Number(String(data.count || "0").replace(/,/g, ""));
+    return Number.isFinite(value) ? value : 0;
+  } catch (e) { return null; }
+}
+async function renderMonitor() {
+  const box = $("monitorStats");
+  if (!box) return;
+  if (!analyticsCode()) {
+    box.innerHTML = '<div class="empty-state"><strong>Monitor is not connected yet.</strong><span>Master Admin can add the GoatCounter site code in Master Admin → Analytics.</span></div>';
+    return;
+  }
+  box.innerHTML = '<div class="empty-state"><span>Loading visit statistics…</span></div>';
+  const [day, week, month] = await Promise.all([fetchVisitCount(0), fetchVisitCount(7), fetchVisitCount(30)]);
+  box.innerHTML = [
+    ["Today", day], ["Last 7 days", week], ["Last 30 days", month]
+  ].map(([label, value]) => '<div class="monitor-stat"><strong>' + (value === null ? "—" : value.toLocaleString("en-IN")) + '</strong><span>' + label + '</span></div>').join("");
+}
+
 function recordChange(patch) {
   const state = applyPatch(loadState(), patch);
   saveState(state);
@@ -1112,6 +1213,23 @@ function showLockout() {
 
 
 
+function showAdminSection(section) {
+  document.querySelectorAll("[data-admin-section]").forEach(el => { el.hidden = el.dataset.adminSection !== section; });
+  document.querySelectorAll("[data-admin-nav]").forEach(btn => btn.classList.toggle("is-active", btn.dataset.adminNav === section));
+  if (section === "monitor") renderMonitor();
+}
+function bindAddDishForm() {
+  const form = $("addDishForm");
+  if (!form || form.dataset.bound) return;
+  form.dataset.bound = "true";
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const result = addDish({ name: $("newDishName").value, category: $("newDishCategory").value, price: $("newDishPrice").value, description: $("newDishDescription").value, veg: $("newDishVeg").checked });
+    const msg = $("addDishMessage");
+    if (msg) { msg.textContent = result.ok ? result.dish.name + " added. Publishing…" : result.error; msg.className = "sync-message " + (result.ok ? "ok" : "err"); }
+    if (result.ok) form.reset();
+  });
+}
 function initAdmin() {
   const loginForm = $("loginForm");
   if (loginForm) {
@@ -1144,6 +1262,9 @@ function initAdmin() {
 
   const resetBtn = $("resetBtn");
   if (resetBtn) resetBtn.addEventListener("click", () => { if (confirm("Reset all dishes to available?")) resetAllAvailable(); });
+  document.querySelectorAll("[data-admin-nav]").forEach(btn => btn.addEventListener("click", () => showAdminSection(btn.dataset.adminNav)));
+  bindAddDishForm();
+  showAdminSection("monitor");
 
   const settingsBtn = $("syncSettingsBtn");
   if (settingsBtn) settingsBtn.addEventListener("click", toggleSyncSettings);
@@ -1244,6 +1365,28 @@ function renderMasterAdmin(message, kind) {
   const disconnect = $("masterDisconnectBtn");
   if (disconnect) disconnect.hidden = !token;
 }
+async function saveAnalyticsCode(code) {
+  code = String(code || "").trim().replace(/^https?:\/\//, "").split(".")[0];
+  const token = getToken();
+  if (!token) { renderMasterAdmin("Connect a GitHub token first.", "err"); return; }
+  if (!/^[a-z0-9_-]+$/i.test(code)) { renderMasterAdmin("Enter the GoatCounter site code only, for example: abcd1234.", "err"); return; }
+  try {
+    const url = contentsUrl().replace(CONFIG.dataPath, ANALYTICS_CONFIG_PATH);
+    let sha = "";
+    try {
+      const existing = await ghFetch(url + "?ref=" + encodeURIComponent(CONFIG.branch), token);
+      const file = await existing.json();
+      sha = file.sha || "";
+    } catch (e) {}
+    const payload = JSON.stringify({ version: 1, provider: "goatcounter", code }, null, 2) + "\n";
+    const body = { message: "analytics: configure visitor monitor", content: utf8ToBase64(payload), branch: CONFIG.branch };
+    if (sha) body.sha = sha;
+    await ghFetch(url, token, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    analyticsConfig = { provider: "goatcounter", code };
+    renderMasterAdmin("Visitor monitor connected to GoatCounter: " + code + ".", "ok");
+  } catch (err) { renderMasterAdmin(err.message || "Could not save analytics settings.", "err"); }
+}
+
 async function masterConnectGitHub(token) {
   token = String(token || "").trim();
   if (!token) { renderMasterAdmin("Paste a GitHub token first.", "err"); return; }
@@ -1278,7 +1421,12 @@ function initMasterAdmin() {
   if (tokenForm) tokenForm.addEventListener("submit", e => { e.preventDefault(); masterConnectGitHub($("masterTokenInput").value); });
   const disconnect = $("masterDisconnectBtn");
   if (disconnect) disconnect.addEventListener("click", masterDisconnectGitHub);
-  if (masterVisible()) renderMasterAdmin();
+  const analyticsForm = $("analyticsForm");
+  if (analyticsForm) analyticsForm.addEventListener("submit", e => { e.preventDefault(); saveAnalyticsCode($("analyticsCodeInput").value); });
+  if (masterVisible()) {
+    renderMasterAdmin();
+    fetchAnalyticsConfig().then(() => { if ($("analyticsCodeInput")) $("analyticsCodeInput").value = analyticsCode(); });
+  }
 }
 
 /* ------------------------------------------------------------------ Boot */
@@ -1291,6 +1439,20 @@ window.addEventListener("storage", e => {
     if (e.key === GITHUB_TOKEN_KEY && getToken()) publisher.schedule();
   }
 });
+
+function startAnalyticsTracking() {
+  const code = analyticsCode();
+  if (!code || $("masterLogin") || IS_ADMIN) return;
+  if (document.querySelector("script[data-spice-analytics]")) return;
+  const script = document.createElement("script");
+  script.dataset.spiceAnalytics = "true";
+  script.dataset.goatcounter = "https://" + code + ".goatcounter.com/count";
+  script.async = true;
+  script.src = "https://gc.zgo.at/count.v5.js";
+  script.crossOrigin = "anonymous";
+  script.integrity = "sha384-atnOLvQb9t+jSipvd75X2yginT4PjVbDqlJAmxMm+wYElFmeR6EmLP5bYeoRVQ";
+  document.head.appendChild(script);
+}
 
 async function boot() {
   const hasMenuPage = Boolean($("menu")) || IS_ADMIN;
@@ -1318,5 +1480,5 @@ window.SpiceStreetMenu = {
   // admin passcode
   hashCredentials, sha256Hex, sha256Pure, sameDigest, readAttempts, lockRemaining,
   DEFAULT_CREDENTIAL_SHA256,
-  masterConnectGitHub, masterDisconnectGitHub
+  masterConnectGitHub, masterDisconnectGitHub, addDish, renderMonitor
 };

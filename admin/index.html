@@ -1,42 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
-  <title>Spice Street - Admin</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=15">
-  <link rel="stylesheet" href="/styles.css?v=15">
-</head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow">
+<title>Spice Street - Admin</title><link rel="icon" type="image/svg+xml" href="/favicon.svg?v=18"><link rel="stylesheet" href="/styles.css?v=18"></head>
 <body class="admin-page">
-  <header class="topbar admin-topbar">
-    <div>
-      <p class="eyebrow">RESTAURANT ADMIN</p>
-      <h1>Spice Street</h1>
-      <p class="sub">Manage availability & menu pricing</p>
-    </div>
-    <div class="top-actions"><a class="admin-link" href="/customer/">Customer View</a><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button></div>
-  </header>
-  <section id="adminLogin" class="login-screen"><div class="login-card"><div class="login-logo">🍽️</div><p class="eyebrow">SPICE STREET</p><h2>Restaurant Admin</h2><p class="login-sub">Sign in to manage today’s menu availability.</p><form id="loginForm"><label>Username<input id="loginUsername" type="text" autocomplete="username" required></label><label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="login-btn" type="submit">Sign in</button><p id="loginError" class="login-error" role="alert"></p></form></div></section><main id="adminApp" class="container admin-container" hidden>
-    <section id="syncPanel" class="sync-panel">
-      <div class="sync-row">
-        <span id="syncDot" class="sync-dot off" aria-hidden="true"></span>
-        <div class="sync-text" aria-live="polite">
-          <strong id="syncTitle">Checking menu update…</strong>
-          <span id="syncDetail">Price and availability changes publish automatically.</span>
-        </div>
-        <div class="sync-actions">
-          <button id="syncRetryBtn" class="sync-btn primary" type="button" hidden>Retry</button>
-        </div>
-      </div>
-    </section>
-    <section class="admin-summary">
-      <div><strong id="availableCount">0</strong><span>Available</span></div>
-      <div><strong id="soldOutCount">0</strong><span>Sold out</span></div>
-      <button id="resetBtn" class="secondary-btn">Reset All</button>
-    </section>
-    <section id="adminMenu" class="admin-list"></section>
-  </main>
-  <script src="/app.js?v=17"></script>
-</body>
-</html>
+<header class="topbar admin-topbar"><div><p class="eyebrow">RESTAURANT ADMIN</p><h1>Spice Street</h1><p class="sub">Manage your digital menu</p></div><div class="top-actions"><a class="admin-link" href="/customer/">Customer View</a><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button></div></header>
+<section id="adminLogin" class="login-screen"><div class="login-card"><div class="login-logo">🍽️</div><p class="eyebrow">SPICE STREET</p><h2>Restaurant Admin</h2><p class="login-sub">Sign in to manage today’s menu.</p><form id="loginForm"><label>Username<input id="loginUsername" type="text" autocomplete="username" required></label><label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="login-btn" type="submit">Sign in</button><p id="loginError" class="login-error" role="alert"></p></form></div></section>
+<main id="adminApp" class="container admin-container" hidden>
+<nav class="admin-nav" aria-label="Admin sections">
+<button type="button" data-admin-nav="monitor" class="admin-nav-card is-active"><span class="admin-nav-icon">📊</span><strong>Monitor</strong><small>Visits today / week / month</small></button>
+<button type="button" data-admin-nav="menu" class="admin-nav-card"><span class="admin-nav-icon">🍽️</span><strong>Menu Change</strong><small>Prices, availability & new dishes</small></button>
+</nav>
+<section data-admin-section="monitor" class="admin-section"><div class="section-heading"><div><p class="eyebrow">MONITOR</p><h2>Menu visits</h2><p>Customer menu pageviews from your analytics service.</p></div><button class="sync-btn" type="button" onclick="SpiceStreetMenu.renderMonitor()">Refresh</button></div><div id="monitorStats" class="monitor-grid"></div></section>
+<section data-admin-section="menu" class="admin-section" hidden>
+<section id="syncPanel" class="sync-panel"><div class="sync-row"><span id="syncDot" class="sync-dot off" aria-hidden="true"></span><div class="sync-text" aria-live="polite"><strong id="syncTitle">Checking menu update…</strong><span id="syncDetail">Price and availability changes publish automatically.</span></div><div class="sync-actions"><button id="syncRetryBtn" class="sync-btn primary" type="button" hidden>Retry</button></div></div></section>
+<section class="admin-summary"><div><strong id="availableCount">0</strong><span>Available</span></div><div><strong id="soldOutCount">0</strong><span>Sold out</span></div><button id="resetBtn" class="secondary-btn">Reset All</button></section>
+<section class="add-dish-panel"><div class="section-heading"><div><p class="eyebrow">MENU CHANGE</p><h2>Add new dish</h2><p>Add a new item and publish it to the customer menu.</p></div></div>
+<form id="addDishForm" class="add-dish-form" autocomplete="off"><label>Dish name<input id="newDishName" type="text" placeholder="Example: Chicken Kebab" required></label><label>Category<input id="newDishCategory" type="text" placeholder="Example: Starters" required></label><label>Price<input id="newDishPrice" type="number" min="0" step="1" placeholder="150" required></label><label>Description<input id="newDishDescription" type="text" placeholder="Short description"></label><label class="check-label"><input id="newDishVeg" type="checkbox"> Vegetarian</label><button class="sync-btn primary" type="submit">Add Dish</button><p id="addDishMessage" class="sync-message" role="status"></p></form></section>
+<section id="adminMenu" class="admin-list"></section>
+</section></main>
+<script src="/app.js?v=19"></script></body></html>

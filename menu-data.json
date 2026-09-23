@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T10:54:52.209Z",
+  "updatedAt": "2026-09-23T10:57:58.235Z",
   "items": [
     {
       "id": 1,
@@ -56,7 +56,7 @@
       "category": "Starters",
       "price": 110,
       "description": "Crispy, spicy South Indian chicken starter.",
-      "available": false
+      "available": true
     },
     {
       "id": 8,
@@ -64,7 +64,7 @@
       "category": "Starters",
       "price": 100,
       "description": "Crispy paneer tossed with Indian spices.",
-      "available": false
+      "available": true
     },
     {
       "id": 9,

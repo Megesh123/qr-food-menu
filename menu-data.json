@@ -1,0 +1,502 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-23T07:31:56.055Z",
+  "items": [
+    {
+      "id": 1,
+      "name": "Chicken Biriyani",
+      "category": "Biriyani & Rice",
+      "price": 120,
+      "description": "Basmati rice, chicken and aromatic spices.",
+      "available": true
+    },
+    {
+      "id": 2,
+      "name": "Mutton Biriyani",
+      "category": "Biriyani & Rice",
+      "price": 180,
+      "description": "Slow-cooked mutton with fragrant biriyani rice.",
+      "available": false
+    },
+    {
+      "id": 3,
+      "name": "Egg Biriyani",
+      "category": "Biriyani & Rice",
+      "price": 110,
+      "description": "Fragrant biriyani rice with seasoned boiled egg.",
+      "available": true
+    },
+    {
+      "id": 4,
+      "name": "Veg Biriyani",
+      "category": "Biriyani & Rice",
+      "price": 100,
+      "description": "Basmati rice cooked with fresh vegetables and spices.",
+      "available": true
+    },
+    {
+      "id": 5,
+      "name": "Mushroom Biriyani",
+      "category": "Biriyani & Rice",
+      "price": 120,
+      "description": "Aromatic rice with tender mushrooms and herbs.",
+      "available": true
+    },
+    {
+      "id": 6,
+      "name": "Jeera Rice",
+      "category": "Biriyani & Rice",
+      "price": 80,
+      "description": "Steamed basmati rice tempered with cumin.",
+      "available": true
+    },
+    {
+      "id": 7,
+      "name": "Chicken 65",
+      "category": "Starters",
+      "price": 110,
+      "description": "Crispy, spicy South Indian chicken starter.",
+      "available": true
+    },
+    {
+      "id": 8,
+      "name": "Paneer 65",
+      "category": "Starters",
+      "price": 100,
+      "description": "Crispy paneer tossed with Indian spices.",
+      "available": true
+    },
+    {
+      "id": 9,
+      "name": "Chicken Lollipop",
+      "category": "Starters",
+      "price": 150,
+      "description": "Crispy chicken wings coated in spicy masala.",
+      "available": true
+    },
+    {
+      "id": 10,
+      "name": "Gobi 65",
+      "category": "Starters",
+      "price": 90,
+      "description": "Crispy cauliflower with chilli and curry leaves.",
+      "available": true
+    },
+    {
+      "id": 11,
+      "name": "Mushroom Pepper Fry",
+      "category": "Starters",
+      "price": 100,
+      "description": "Mushroom tossed with cracked pepper and onions.",
+      "available": true
+    },
+    {
+      "id": 12,
+      "name": "Idli",
+      "category": "South Indian",
+      "price": 40,
+      "description": "Soft steamed rice cakes served with chutney and sambar.",
+      "available": true
+    },
+    {
+      "id": 13,
+      "name": "Vada",
+      "category": "South Indian",
+      "price": 45,
+      "description": "Crispy lentil fritter served with chutney.",
+      "available": true
+    },
+    {
+      "id": 14,
+      "name": "Plain Dosa",
+      "category": "South Indian",
+      "price": 55,
+      "description": "Golden crispy dosa with chutney and sambar.",
+      "available": true
+    },
+    {
+      "id": 15,
+      "name": "Masala Dosa",
+      "category": "South Indian",
+      "price": 80,
+      "description": "Crispy dosa filled with seasoned potato masala.",
+      "available": true
+    },
+    {
+      "id": 16,
+      "name": "Ghee Roast Dosa",
+      "category": "South Indian",
+      "price": 95,
+      "description": "Thin dosa roasted with aromatic ghee.",
+      "available": true
+    },
+    {
+      "id": 17,
+      "name": "Pongal",
+      "category": "South Indian",
+      "price": 60,
+      "description": "Comforting rice and lentil pongal with ghee.",
+      "available": true
+    },
+    {
+      "id": 18,
+      "name": "Veg Meals",
+      "category": "South Indian",
+      "price": 100,
+      "description": "Rice, vegetables, sambar, rasam and sides.",
+      "available": true
+    },
+    {
+      "id": 19,
+      "name": "Parotta",
+      "category": "Breads",
+      "price": 25,
+      "description": "Flaky layered South Indian flatbread.",
+      "available": true
+    },
+    {
+      "id": 20,
+      "name": "Egg Parotta",
+      "category": "Breads",
+      "price": 70,
+      "description": "Layered parotta tossed with egg and spices.",
+      "available": true
+    },
+    {
+      "id": 21,
+      "name": "Chapati",
+      "category": "Breads",
+      "price": 35,
+      "description": "Soft whole-wheat flatbread.",
+      "available": true
+    },
+    {
+      "id": 22,
+      "name": "Butter Naan",
+      "category": "Breads",
+      "price": 55,
+      "description": "Soft naan brushed with butter.",
+      "available": true
+    },
+    {
+      "id": 23,
+      "name": "Garlic Naan",
+      "category": "Breads",
+      "price": 65,
+      "description": "Tandoor-baked naan with garlic and coriander.",
+      "available": true
+    },
+    {
+      "id": 24,
+      "name": "Chicken Curry",
+      "category": "Curries",
+      "price": 130,
+      "description": "Homestyle chicken curry with rich spices.",
+      "available": true
+    },
+    {
+      "id": 25,
+      "name": "Mutton Curry",
+      "category": "Curries",
+      "price": 180,
+      "description": "Tender mutton cooked in a traditional masala.",
+      "available": true
+    },
+    {
+      "id": 26,
+      "name": "Fish Curry",
+      "category": "Curries",
+      "price": 150,
+      "description": "South Indian fish curry with tangy spices.",
+      "available": true
+    },
+    {
+      "id": 27,
+      "name": "Paneer Butter Masala",
+      "category": "Curries",
+      "price": 130,
+      "description": "Paneer in a creamy tomato and butter gravy.",
+      "available": true
+    },
+    {
+      "id": 28,
+      "name": "Dal Tadka",
+      "category": "Curries",
+      "price": 90,
+      "description": "Yellow lentils finished with a fragrant tempering.",
+      "available": true
+    },
+    {
+      "id": 29,
+      "name": "Margherita Pizza",
+      "category": "Pizza",
+      "price": 180,
+      "description": "Tomato, mozzarella and basil on a crisp base.",
+      "available": true
+    },
+    {
+      "id": 30,
+      "name": "Veggie Pizza",
+      "category": "Pizza",
+      "price": 220,
+      "description": "Onion, capsicum, corn and tomato with cheese.",
+      "available": true
+    },
+    {
+      "id": 31,
+      "name": "Paneer Tikka Pizza",
+      "category": "Pizza",
+      "price": 250,
+      "description": "Paneer tikka, onion and capsicum with cheese.",
+      "available": true
+    },
+    {
+      "id": 32,
+      "name": "Chicken Tikka Pizza",
+      "category": "Pizza",
+      "price": 280,
+      "description": "Chicken tikka, onion and capsicum on a cheesy base.",
+      "available": true
+    },
+    {
+      "id": 33,
+      "name": "Cheese Burst Pizza",
+      "category": "Pizza",
+      "price": 260,
+      "description": "Loaded cheese pizza with a rich cheese-filled crust.",
+      "available": true
+    },
+    {
+      "id": 34,
+      "name": "Classic Veg Burger",
+      "category": "Burgers & Sandwiches",
+      "price": 100,
+      "description": "Crispy veg patty with lettuce, tomato and sauce.",
+      "available": true
+    },
+    {
+      "id": 35,
+      "name": "Chicken Burger",
+      "category": "Burgers & Sandwiches",
+      "price": 140,
+      "description": "Juicy chicken patty with fresh salad and sauce.",
+      "available": true
+    },
+    {
+      "id": 36,
+      "name": "Paneer Burger",
+      "category": "Burgers & Sandwiches",
+      "price": 130,
+      "description": "Spiced paneer patty with creamy sauce.",
+      "available": true
+    },
+    {
+      "id": 37,
+      "name": "Grilled Cheese Sandwich",
+      "category": "Burgers & Sandwiches",
+      "price": 90,
+      "description": "Toasted bread with melted cheese and herbs.",
+      "available": true
+    },
+    {
+      "id": 38,
+      "name": "Chicken Club Sandwich",
+      "category": "Burgers & Sandwiches",
+      "price": 150,
+      "description": "Triple-layer sandwich with chicken, egg and salad.",
+      "available": true
+    },
+    {
+      "id": 39,
+      "name": "Veg Hakka Noodles",
+      "category": "Chinese",
+      "price": 120,
+      "description": "Wok-tossed noodles with vegetables and sauces.",
+      "available": true
+    },
+    {
+      "id": 40,
+      "name": "Chicken Hakka Noodles",
+      "category": "Chinese",
+      "price": 150,
+      "description": "Wok-tossed noodles with chicken and vegetables.",
+      "available": true
+    },
+    {
+      "id": 41,
+      "name": "Veg Fried Rice",
+      "category": "Chinese",
+      "price": 110,
+      "description": "Fragrant fried rice with fresh vegetables.",
+      "available": true
+    },
+    {
+      "id": 42,
+      "name": "Chicken Fried Rice",
+      "category": "Chinese",
+      "price": 140,
+      "description": "Wok-fried rice with chicken, egg and vegetables.",
+      "available": true
+    },
+    {
+      "id": 43,
+      "name": "Gobi Manchurian",
+      "category": "Chinese",
+      "price": 110,
+      "description": "Crispy cauliflower in a tangy Manchurian sauce.",
+      "available": true
+    },
+    {
+      "id": 44,
+      "name": "White Sauce Pasta",
+      "category": "Pasta",
+      "price": 150,
+      "description": "Creamy pasta with herbs and vegetables.",
+      "available": true
+    },
+    {
+      "id": 45,
+      "name": "Arrabbiata Pasta",
+      "category": "Pasta",
+      "price": 140,
+      "description": "Pasta in a spicy tomato and garlic sauce.",
+      "available": true
+    },
+    {
+      "id": 46,
+      "name": "Chicken Alfredo Pasta",
+      "category": "Pasta",
+      "price": 190,
+      "description": "Creamy Alfredo pasta with tender chicken.",
+      "available": true
+    },
+    {
+      "id": 47,
+      "name": "Pesto Veg Pasta",
+      "category": "Pasta",
+      "price": 170,
+      "description": "Pasta tossed with basil pesto and vegetables.",
+      "available": true
+    },
+    {
+      "id": 48,
+      "name": "Gulab Jamun",
+      "category": "Desserts",
+      "price": 50,
+      "description": "Soft milk-solid dumplings in sugar syrup.",
+      "available": true
+    },
+    {
+      "id": 49,
+      "name": "Brownie",
+      "category": "Desserts",
+      "price": 80,
+      "description": "Warm chocolate brownie with a rich fudgy center.",
+      "available": true
+    },
+    {
+      "id": 50,
+      "name": "Chocolate Cake",
+      "category": "Desserts",
+      "price": 90,
+      "description": "Moist chocolate cake with creamy frosting.",
+      "available": true
+    },
+    {
+      "id": 51,
+      "name": "Carrot Halwa",
+      "category": "Desserts",
+      "price": 70,
+      "description": "Slow-cooked carrot dessert with milk and nuts.",
+      "available": true
+    },
+    {
+      "id": 52,
+      "name": "Payasam",
+      "category": "Desserts",
+      "price": 60,
+      "description": "Traditional South Indian milk and vermicelli dessert.",
+      "available": true
+    },
+    {
+      "id": 53,
+      "name": "Vanilla Ice Cream",
+      "category": "Ice Cream",
+      "price": 60,
+      "description": "Classic creamy vanilla scoop.",
+      "available": true
+    },
+    {
+      "id": 54,
+      "name": "Chocolate Ice Cream",
+      "category": "Ice Cream",
+      "price": 70,
+      "description": "Rich chocolate ice cream scoop.",
+      "available": true
+    },
+    {
+      "id": 55,
+      "name": "Mango Ice Cream",
+      "category": "Ice Cream",
+      "price": 70,
+      "description": "Creamy seasonal mango ice cream.",
+      "available": true
+    },
+    {
+      "id": 56,
+      "name": "Ice Cream Sundae",
+      "category": "Ice Cream",
+      "price": 110,
+      "description": "Scoops topped with chocolate sauce and nuts.",
+      "available": true
+    },
+    {
+      "id": 57,
+      "name": "Lime Juice",
+      "category": "Drinks",
+      "price": 30,
+      "description": "Fresh lime juice served chilled.",
+      "available": true
+    },
+    {
+      "id": 58,
+      "name": "Fresh Fruit Juice",
+      "category": "Drinks",
+      "price": 60,
+      "description": "Seasonal fresh fruit juice.",
+      "available": false
+    },
+    {
+      "id": 59,
+      "name": "Mango Juice",
+      "category": "Drinks",
+      "price": 70,
+      "description": "Refreshing mango juice.",
+      "available": true
+    },
+    {
+      "id": 60,
+      "name": "Fresh Lime Soda",
+      "category": "Drinks",
+      "price": 40,
+      "description": "Chilled lime soda with a refreshing fizz.",
+      "available": true
+    },
+    {
+      "id": 61,
+      "name": "Cold Coffee",
+      "category": "Drinks",
+      "price": 90,
+      "description": "Chilled creamy coffee drink.",
+      "available": true
+    },
+    {
+      "id": 62,
+      "name": "Masala Tea",
+      "category": "Drinks",
+      "price": 30,
+      "description": "Hot Indian tea brewed with aromatic spices.",
+      "available": true
+    }
+  ]
+}

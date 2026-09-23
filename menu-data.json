@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T09:18:38.402Z",
+  "updatedAt": "2026-09-23T09:18:45.669Z",
   "items": [
     {
       "id": 1,
@@ -24,7 +24,7 @@
       "category": "Biriyani & Rice",
       "price": 110,
       "description": "Fragrant biriyani rice with seasoned boiled egg.",
-      "available": true
+      "available": false
     },
     {
       "id": 4,
@@ -32,7 +32,7 @@
       "category": "Biriyani & Rice",
       "price": 100,
       "description": "Basmati rice cooked with fresh vegetables and spices.",
-      "available": true
+      "available": false
     },
     {
       "id": 5,

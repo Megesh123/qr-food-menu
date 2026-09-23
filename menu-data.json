@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T11:10:18.206Z",
+  "updatedAt": "2026-09-23T11:36:17.374Z",
   "items": [
     {
       "id": 1,
@@ -8,6 +8,7 @@
       "category": "Biriyani & Rice",
       "price": 120,
       "description": "Basmati rice, chicken and aromatic spices.",
+      "veg": false,
       "available": true
     },
     {
@@ -16,6 +17,7 @@
       "category": "Biriyani & Rice",
       "price": 180,
       "description": "Slow-cooked mutton with fragrant biriyani rice.",
+      "veg": false,
       "available": true
     },
     {
@@ -24,6 +26,7 @@
       "category": "Biriyani & Rice",
       "price": 110,
       "description": "Fragrant biriyani rice with seasoned boiled egg.",
+      "veg": false,
       "available": false
     },
     {
@@ -32,6 +35,7 @@
       "category": "Biriyani & Rice",
       "price": 100,
       "description": "Basmati rice cooked with fresh vegetables and spices.",
+      "veg": true,
       "available": false
     },
     {
@@ -40,6 +44,7 @@
       "category": "Biriyani & Rice",
       "price": 120,
       "description": "Aromatic rice with tender mushrooms and herbs.",
+      "veg": true,
       "available": false
     },
     {
@@ -48,6 +53,7 @@
       "category": "Biriyani & Rice",
       "price": 80,
       "description": "Steamed basmati rice tempered with cumin.",
+      "veg": true,
       "available": true
     },
     {
@@ -56,6 +62,7 @@
       "category": "Starters",
       "price": 110,
       "description": "Crispy, spicy South Indian chicken starter.",
+      "veg": false,
       "available": true
     },
     {
@@ -64,6 +71,7 @@
       "category": "Starters",
       "price": 100,
       "description": "Crispy paneer tossed with Indian spices.",
+      "veg": true,
       "available": true
     },
     {
@@ -72,6 +80,7 @@
       "category": "Starters",
       "price": 150,
       "description": "Crispy chicken wings coated in spicy masala.",
+      "veg": false,
       "available": true
     },
     {
@@ -80,6 +89,7 @@
       "category": "Starters",
       "price": 90,
       "description": "Crispy cauliflower with chilli and curry leaves.",
+      "veg": true,
       "available": true
     },
     {
@@ -88,6 +98,7 @@
       "category": "Starters",
       "price": 100,
       "description": "Mushroom tossed with cracked pepper and onions.",
+      "veg": true,
       "available": true
     },
     {
@@ -96,6 +107,7 @@
       "category": "South Indian",
       "price": 40,
       "description": "Soft steamed rice cakes served with chutney and sambar.",
+      "veg": true,
       "available": true
     },
     {
@@ -104,6 +116,7 @@
       "category": "South Indian",
       "price": 45,
       "description": "Crispy lentil fritter served with chutney.",
+      "veg": true,
       "available": true
     },
     {
@@ -112,6 +125,7 @@
       "category": "South Indian",
       "price": 55,
       "description": "Golden crispy dosa with chutney and sambar.",
+      "veg": true,
       "available": true
     },
     {
@@ -120,6 +134,7 @@
       "category": "South Indian",
       "price": 80,
       "description": "Crispy dosa filled with seasoned potato masala.",
+      "veg": true,
       "available": true
     },
     {
@@ -128,6 +143,7 @@
       "category": "South Indian",
       "price": 95,
       "description": "Thin dosa roasted with aromatic ghee.",
+      "veg": true,
       "available": true
     },
     {
@@ -136,6 +152,7 @@
       "category": "South Indian",
       "price": 60,
       "description": "Comforting rice and lentil pongal with ghee.",
+      "veg": true,
       "available": true
     },
     {
@@ -144,6 +161,7 @@
       "category": "South Indian",
       "price": 100,
       "description": "Rice, vegetables, sambar, rasam and sides.",
+      "veg": true,
       "available": true
     },
     {
@@ -152,6 +170,7 @@
       "category": "Breads",
       "price": 25,
       "description": "Flaky layered South Indian flatbread.",
+      "veg": true,
       "available": true
     },
     {
@@ -160,6 +179,7 @@
       "category": "Breads",
       "price": 70,
       "description": "Layered parotta tossed with egg and spices.",
+      "veg": false,
       "available": true
     },
     {
@@ -168,6 +188,7 @@
       "category": "Breads",
       "price": 35,
       "description": "Soft whole-wheat flatbread.",
+      "veg": true,
       "available": true
     },
     {
@@ -176,6 +197,7 @@
       "category": "Breads",
       "price": 55,
       "description": "Soft naan brushed with butter.",
+      "veg": true,
       "available": true
     },
     {
@@ -184,6 +206,7 @@
       "category": "Breads",
       "price": 65,
       "description": "Tandoor-baked naan with garlic and coriander.",
+      "veg": true,
       "available": true
     },
     {
@@ -192,6 +215,7 @@
       "category": "Curries",
       "price": 130,
       "description": "Homestyle chicken curry with rich spices.",
+      "veg": false,
       "available": true
     },
     {
@@ -200,6 +224,7 @@
       "category": "Curries",
       "price": 180,
       "description": "Tender mutton cooked in a traditional masala.",
+      "veg": false,
       "available": true
     },
     {
@@ -208,6 +233,7 @@
       "category": "Curries",
       "price": 150,
       "description": "South Indian fish curry with tangy spices.",
+      "veg": false,
       "available": true
     },
     {
@@ -216,6 +242,7 @@
       "category": "Curries",
       "price": 130,
       "description": "Paneer in a creamy tomato and butter gravy.",
+      "veg": true,
       "available": true
     },
     {
@@ -224,6 +251,7 @@
       "category": "Curries",
       "price": 90,
       "description": "Yellow lentils finished with a fragrant tempering.",
+      "veg": true,
       "available": true
     },
     {
@@ -232,6 +260,7 @@
       "category": "Pizza",
       "price": 180,
       "description": "Tomato, mozzarella and basil on a crisp base.",
+      "veg": true,
       "available": true
     },
     {
@@ -240,6 +269,7 @@
       "category": "Pizza",
       "price": 220,
       "description": "Onion, capsicum, corn and tomato with cheese.",
+      "veg": true,
       "available": true
     },
     {
@@ -248,6 +278,7 @@
       "category": "Pizza",
       "price": 250,
       "description": "Paneer tikka, onion and capsicum with cheese.",
+      "veg": true,
       "available": true
     },
     {
@@ -256,6 +287,7 @@
       "category": "Pizza",
       "price": 280,
       "description": "Chicken tikka, onion and capsicum on a cheesy base.",
+      "veg": false,
       "available": true
     },
     {
@@ -264,6 +296,7 @@
       "category": "Pizza",
       "price": 260,
       "description": "Loaded cheese pizza with a rich cheese-filled crust.",
+      "veg": true,
       "available": true
     },
     {
@@ -272,6 +305,7 @@
       "category": "Burgers & Sandwiches",
       "price": 100,
       "description": "Crispy veg patty with lettuce, tomato and sauce.",
+      "veg": true,
       "available": true
     },
     {
@@ -280,6 +314,7 @@
       "category": "Burgers & Sandwiches",
       "price": 140,
       "description": "Juicy chicken patty with fresh salad and sauce.",
+      "veg": false,
       "available": true
     },
     {
@@ -288,6 +323,7 @@
       "category": "Burgers & Sandwiches",
       "price": 130,
       "description": "Spiced paneer patty with creamy sauce.",
+      "veg": true,
       "available": true
     },
     {
@@ -296,6 +332,7 @@
       "category": "Burgers & Sandwiches",
       "price": 90,
       "description": "Toasted bread with melted cheese and herbs.",
+      "veg": true,
       "available": true
     },
     {
@@ -304,6 +341,7 @@
       "category": "Burgers & Sandwiches",
       "price": 150,
       "description": "Triple-layer sandwich with chicken, egg and salad.",
+      "veg": false,
       "available": true
     },
     {
@@ -312,6 +350,7 @@
       "category": "Chinese",
       "price": 120,
       "description": "Wok-tossed noodles with vegetables and sauces.",
+      "veg": true,
       "available": true
     },
     {
@@ -320,6 +359,7 @@
       "category": "Chinese",
       "price": 150,
       "description": "Wok-tossed noodles with chicken and vegetables.",
+      "veg": false,
       "available": true
     },
     {
@@ -328,6 +368,7 @@
       "category": "Chinese",
       "price": 110,
       "description": "Fragrant fried rice with fresh vegetables.",
+      "veg": true,
       "available": true
     },
     {
@@ -336,6 +377,7 @@
       "category": "Chinese",
       "price": 140,
       "description": "Wok-fried rice with chicken, egg and vegetables.",
+      "veg": false,
       "available": true
     },
     {
@@ -344,6 +386,7 @@
       "category": "Chinese",
       "price": 110,
       "description": "Crispy cauliflower in a tangy Manchurian sauce.",
+      "veg": true,
       "available": true
     },
     {
@@ -352,6 +395,7 @@
       "category": "Pasta",
       "price": 150,
       "description": "Creamy pasta with herbs and vegetables.",
+      "veg": true,
       "available": true
     },
     {
@@ -360,6 +404,7 @@
       "category": "Pasta",
       "price": 140,
       "description": "Pasta in a spicy tomato and garlic sauce.",
+      "veg": true,
       "available": true
     },
     {
@@ -368,6 +413,7 @@
       "category": "Pasta",
       "price": 190,
       "description": "Creamy Alfredo pasta with tender chicken.",
+      "veg": false,
       "available": true
     },
     {
@@ -376,6 +422,7 @@
       "category": "Pasta",
       "price": 170,
       "description": "Pasta tossed with basil pesto and vegetables.",
+      "veg": true,
       "available": true
     },
     {
@@ -384,6 +431,7 @@
       "category": "Desserts",
       "price": 50,
       "description": "Soft milk-solid dumplings in sugar syrup.",
+      "veg": true,
       "available": true
     },
     {
@@ -392,6 +440,7 @@
       "category": "Desserts",
       "price": 80,
       "description": "Warm chocolate brownie with a rich fudgy center.",
+      "veg": true,
       "available": true
     },
     {
@@ -400,6 +449,7 @@
       "category": "Desserts",
       "price": 90,
       "description": "Moist chocolate cake with creamy frosting.",
+      "veg": true,
       "available": true
     },
     {
@@ -408,6 +458,7 @@
       "category": "Desserts",
       "price": 70,
       "description": "Slow-cooked carrot dessert with milk and nuts.",
+      "veg": true,
       "available": true
     },
     {
@@ -416,6 +467,7 @@
       "category": "Desserts",
       "price": 60,
       "description": "Traditional South Indian milk and vermicelli dessert.",
+      "veg": true,
       "available": true
     },
     {
@@ -424,6 +476,7 @@
       "category": "Ice Cream",
       "price": 60,
       "description": "Classic creamy vanilla scoop.",
+      "veg": true,
       "available": true
     },
     {
@@ -432,6 +485,7 @@
       "category": "Ice Cream",
       "price": 70,
       "description": "Rich chocolate ice cream scoop.",
+      "veg": true,
       "available": true
     },
     {
@@ -440,6 +494,7 @@
       "category": "Ice Cream",
       "price": 70,
       "description": "Creamy seasonal mango ice cream.",
+      "veg": true,
       "available": true
     },
     {
@@ -448,6 +503,7 @@
       "category": "Ice Cream",
       "price": 110,
       "description": "Scoops topped with chocolate sauce and nuts.",
+      "veg": true,
       "available": true
     },
     {
@@ -456,6 +512,7 @@
       "category": "Drinks",
       "price": 30,
       "description": "Fresh lime juice served chilled.",
+      "veg": true,
       "available": true
     },
     {
@@ -464,6 +521,7 @@
       "category": "Drinks",
       "price": 60,
       "description": "Seasonal fresh fruit juice.",
+      "veg": true,
       "available": true
     },
     {
@@ -472,6 +530,7 @@
       "category": "Drinks",
       "price": 70,
       "description": "Refreshing mango juice.",
+      "veg": true,
       "available": true
     },
     {
@@ -480,6 +539,7 @@
       "category": "Drinks",
       "price": 40,
       "description": "Chilled lime soda with a refreshing fizz.",
+      "veg": true,
       "available": true
     },
     {
@@ -488,6 +548,7 @@
       "category": "Drinks",
       "price": 90,
       "description": "Chilled creamy coffee drink.",
+      "veg": true,
       "available": true
     },
     {
@@ -496,6 +557,16 @@
       "category": "Drinks",
       "price": 30,
       "description": "Hot Indian tea brewed with aromatic spices.",
+      "veg": true,
+      "available": true
+    },
+    {
+      "id": 63,
+      "name": "sdvs",
+      "category": "svdSV",
+      "price": 45,
+      "description": "",
+      "veg": false,
       "available": true
     }
   ]

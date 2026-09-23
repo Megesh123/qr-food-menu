@@ -1296,6 +1296,8 @@ async function submitLogin() {
   if (button) { button.disabled = false; button.textContent = "Sign in"; }
 
   if (ok) {
+    // Existing devices that already have a verified GitHub token are treated as configured.
+    if (getToken()) setDeviceConfigured(true);
     if (!isDeviceConfigured()) {
       if (error) error.textContent = "This device needs one-time setup by Master Admin. Open Master Admin and connect GitHub on this device."; 
       return false;

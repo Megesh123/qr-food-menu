@@ -192,6 +192,7 @@ const ANALYTICS_CONFIG_URL = (() => {
 const MENU_STATE_KEY = "spice-street-menu-state-v3";      // cached menu (all pages)
 const PENDING_KEY = "spice-street-pending-changes-v1";    // admin changes not yet on GitHub
 const GITHUB_TOKEN_KEY = "spice-street-github-token-v2";
+const DEVICE_SETUP_KEY = "spice-street-device-configured-v1";
 const GITHUB_USER_KEY = "spice-street-github-user-v1";
 const ADMIN_SESSION = "spice-street-admin-session";
 
@@ -745,6 +746,9 @@ class PublishError extends Error {
   }
 }
 function getToken() { try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ""; } catch (e) { return ""; } }
+function isDeviceConfigured() { try { return localStorage.getItem(DEVICE_SETUP_KEY) === "true"; } catch (e) { return false; } }
+function setDeviceConfigured(value) { try { if (value) localStorage.setItem(DEVICE_SETUP_KEY, "true"); else localStorage.removeItem(DEVICE_SETUP_KEY); } catch (e) {} }
+
 function setToken(token, login) {
   try {
     if (token) { localStorage.setItem(GITHUB_TOKEN_KEY, token); if (login) localStorage.setItem(GITHUB_USER_KEY, login); }
@@ -1292,6 +1296,10 @@ async function submitLogin() {
   if (button) { button.disabled = false; button.textContent = "Sign in"; }
 
   if (ok) {
+    if (!isDeviceConfigured()) {
+      if (error) error.textContent = "This device needs one-time setup by Master Admin. Open Master Admin and connect GitHub on this device."; 
+      return false;
+    }
     writeAttempts({ count: 0, lockedUntil: 0 });
     stopLockoutTicker();
     sessionStorage.setItem(ADMIN_SESSION, "true");
@@ -1470,6 +1478,7 @@ function initAdmin() {
 let adminStarted = false;
 function afterAdminVisible() {
   if (adminStarted) return;
+  if (!isDeviceConfigured()) { return; }
   adminStarted = true;
   const token = getToken();
   if (!token) { publisher.setStatus("disconnected", "GitHub publishing is managed by Master Admin."); return; }
@@ -1575,8 +1584,9 @@ async function masterConnectGitHub(token) {
   try {
     const login = await verifyToken(token);
     setToken(token, login);
+    setDeviceConfigured(true);
     if ($("masterTokenInput")) $("masterTokenInput").value = "";
-    renderMasterAdmin("GitHub token connected successfully. Normal Admin can now publish menu changes.", "ok");
+    renderMasterAdmin("GitHub connected. This device is now configured. Normal Admin login will work here from now on.", "ok");
   } catch (err) {
     renderMasterAdmin(err.message || "Could not verify the GitHub token.", "err");
   } finally {
@@ -1602,6 +1612,7 @@ function initMasterAdmin() {
   if (disconnect) disconnect.addEventListener("click", masterDisconnectGitHub);
   const analyticsForm = $("analyticsForm");
   if (analyticsForm) analyticsForm.addEventListener("submit", e => { e.preventDefault(); saveAnalyticsCode($("analyticsCodeInput").value); });
+  if (getToken()) setDeviceConfigured(true);
   if (masterVisible()) {
     renderMasterAdmin();
     fetchAnalyticsConfig().then(() => { if ($("analyticsCodeInput")) $("analyticsCodeInput").value = analyticsCode(); });

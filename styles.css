@@ -193,3 +193,67 @@ mark{background:var(--green-bg);color:var(--green);border-radius:4px;padding:0 2
   .hero-copy .landing-badge,.hero-copy h2,.hero-copy>p,.hero-copy .landing-actions{animation:none}
   .food-card,.food-glow,.orbit-dots,.food-marquee>div{animation:none}
 }
+
+/* Full landing-page experience ------------------------------------------- */
+.visual-showcase{margin-top:14px;display:grid;grid-template-columns:.9fr 1.1fr;gap:34px;align-items:center;padding:34px;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.showcase-copy h2{font-size:clamp(32px,6vw,52px);line-height:1;letter-spacing:-2px;margin:8px 0 15px}
+.showcase-copy h2 span,.how-heading h2 span{color:var(--muted)}
+.showcase-copy p{color:var(--muted);font-size:14px;line-height:1.7;max-width:470px;margin:0 0 22px}
+.showcase-collage{height:430px;position:relative}
+.showcase-image{position:absolute;overflow:hidden;border-radius:22px;border:1px solid rgba(255,255,255,.16);box-shadow:0 22px 60px rgba(0,0,0,.3);background:#181818}
+.showcase-image img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.showcase-image:hover img{transform:scale(1.07)}
+.showcase-image::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.72))}
+.showcase-image span{position:absolute;z-index:1;left:15px;bottom:14px;color:#fff;font-size:9px;font-weight:900;letter-spacing:1.4px}
+.showcase-main{width:68%;height:355px;left:5%;top:36px;transform:rotate(-3deg);animation:showcaseFloat 6s ease-in-out infinite}
+.showcase-small{width:39%;height:175px}
+.showcase-small.one{right:1%;top:0;transform:rotate(6deg);animation:showcaseFloatSmall 5.5s ease-in-out .4s infinite}
+.showcase-small.two{right:0;bottom:4px;transform:rotate(-5deg);animation:showcaseFloatSmall 5.8s ease-in-out .8s infinite}
+@keyframes showcaseFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-12px) rotate(-1deg)}}
+@keyframes showcaseFloatSmall{0%,100%{transform:translateY(0) rotate(6deg)}50%{transform:translateY(10px) rotate(3deg)}}
+.category-strip{margin-top:14px;padding:25px 26px;background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.category-pills{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.category-pills span{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:9px 12px;color:var(--muted);font-size:11px;font-weight:750;transition:transform .2s ease,border-color .2s ease,color .2s ease}
+.category-pills span:hover{transform:translateY(-3px);border-color:var(--muted);color:var(--text)}
+.how-section{margin-top:14px;padding:32px;background:var(--card);border:1px solid var(--line);border-radius:22px}
+.how-heading{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:25px}
+.how-heading h2{margin:5px 0 0;font-size:clamp(28px,5vw,42px);line-height:1;letter-spacing:-1.5px}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.how-grid article{position:relative;min-height:235px;border:1px solid var(--line);border-radius:17px;padding:21px;overflow:hidden;background:linear-gradient(145deg,var(--card),var(--bg))}
+.step-number{position:absolute;right:15px;top:13px;font-size:11px;font-weight:900;color:var(--muted);letter-spacing:1px}
+.step-icon{font-size:25px;margin-top:28px;margin-bottom:22px}
+.how-grid h3{margin:0 0 7px;font-size:17px}
+.how-grid p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.mini-banner{margin-top:14px;display:grid;grid-template-columns:.85fr 1.15fr;min-height:285px;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.mini-banner-image{min-height:285px;overflow:hidden}
+.mini-banner-image img{width:100%;height:100%;display:block;object-fit:cover;transition:transform 1s ease}
+.mini-banner:hover .mini-banner-image img{transform:scale(1.05)}
+.mini-banner-copy{padding:38px;display:flex;flex-direction:column;justify-content:center}
+.mini-banner-copy h2{font-size:clamp(27px,5vw,42px);line-height:1.03;letter-spacing:-1.5px;margin:5px 0 12px}
+.mini-banner-copy p{color:var(--muted);font-size:13px;line-height:1.65;max-width:560px;margin:0}
+.reveal-card{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.reveal-card:hover{transform:translateY(-6px);border-color:#555;box-shadow:0 18px 45px rgba(0,0,0,.18)}
+body.light .reveal-card:hover{border-color:#c8c8c4;box-shadow:0 18px 45px rgba(0,0,0,.08)}
+body.light .showcase-image,body.light .mini-banner-image{box-shadow:0 18px 50px rgba(0,0,0,.12)}
+@media(max-width:800px){
+  .visual-showcase{grid-template-columns:1fr;padding:25px}
+  .showcase-collage{height:390px}
+  .how-heading{display:block}
+  .how-grid{grid-template-columns:1fr}
+  .how-grid article{min-height:190px}
+  .mini-banner{grid-template-columns:1fr}
+  .mini-banner-image{min-height:230px}
+}
+@media(max-width:500px){
+  .visual-showcase{padding:20px}
+  .showcase-collage{height:320px;margin-top:5px}
+  .showcase-main{width:69%;height:260px;left:2%;top:28px}
+  .showcase-small{width:39%;height:130px}
+  .showcase-small.one{top:0}
+  .showcase-small.two{bottom:0}
+  .category-strip,.how-section{padding:23px 19px}
+  .mini-banner-copy{padding:27px 22px}
+}
+@media(prefers-reduced-motion:reduce){
+  .showcase-main,.showcase-small{animation:none}
+}

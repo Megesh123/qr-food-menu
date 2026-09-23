@@ -286,7 +286,7 @@ function itemsFromState(state) {
     veg: d.veg !== false, available: state.availability[d.id]
   }));
 }
-// patch = { [id]: { available?: bool, price?: number } }
+// patch = { [id]: { available?: bool, price?: number, deleted?: boolean } }
 function applyPatch(state, patch) {
   const next = normalizeState(state);
   Object.keys(patch || {}).forEach(key => {
@@ -294,6 +294,7 @@ function applyPatch(state, patch) {
     if (!DISH_BY_ID.has(id) || !change) return;
     if (typeof change.available === "boolean") next.availability[id] = change.available;
     if (Number.isFinite(change.price) && change.price >= 0) next.prices[id] = change.price;
+    if (typeof change.deleted === "boolean") setDishDeleted(id, change.deleted);
   });
   return next;
 }
@@ -975,7 +976,7 @@ function addDish({ name, category, price, description, veg }) {
   state.availability[id] = true;
   state.prices[id] = price;
   saveState(state);
-  publisher.addPending({ [id]: { available: true, price } });
+  publisher.addPending({ [id]: { available: true, price, deleted: false } });
   renderAll();
   publisher.schedule();
   return { ok: true, dish };

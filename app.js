@@ -4,26 +4,35 @@ function applyTheme(){
   const theme=saved==="light"?"light":"dark";
   document.body.classList.toggle("light",theme==="light");
   const btn=document.getElementById("themeToggle");
-  if(btn){
-    btn.textContent=theme==="dark"?"☀️ Light":"🌙 Dark";
-    btn.setAttribute("aria-label",theme==="dark"?"Switch to light theme":"Switch to dark theme");
-  }
+  if(btn){btn.textContent=theme==="dark"?"☀️ Light":"🌙 Dark";btn.setAttribute("aria-label",theme==="dark"?"Switch to light theme":"Switch to dark theme");}
 }
-function toggleTheme(){
-  const next=document.body.classList.contains("light")?"dark":"light";
-  localStorage.setItem(THEME_KEY,next);
-  applyTheme();
-}
+function toggleTheme(){const next=document.body.classList.contains("light")?"dark":"light";localStorage.setItem(THEME_KEY,next);applyTheme();}
 const themeToggle=document.getElementById("themeToggle");
 if(themeToggle)themeToggle.addEventListener("click",toggleTheme);
 applyTheme();
+
+const ADMIN_SESSION="spice-street-admin-session";
+const adminLogin=document.getElementById("adminLogin");
+const adminApp=document.getElementById("adminApp");
+if(document.getElementById("loginForm")){
+  if(sessionStorage.getItem(ADMIN_SESSION)==="true"){adminLogin.hidden=true;adminApp.hidden=false;}
+  document.getElementById("loginForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const u=document.getElementById("loginUsername").value.trim();
+    const p=document.getElementById("loginPassword").value;
+    const error=document.getElementById("loginError");
+    if(u==="admin"&&p==="admin"){
+      sessionStorage.setItem(ADMIN_SESSION,"true");
+      adminLogin.hidden=true;adminApp.hidden=false;error.textContent="";renderAdmin();
+    }else error.textContent="Incorrect username or password.";
+  });
+}
 
 const CATEGORIES={
   "Biriyani & Rice":"🍚","Starters":"🍗","South Indian":"🥘","Breads":"🫓",
   "Curries":"🍛","Pizza":"🍕","Burgers & Sandwiches":"🍔","Chinese":"🥡",
   "Pasta":"🍝","Desserts":"🍰","Ice Cream":"🍨","Drinks":"🥤"
 };
-
 const DISHES=[
 {id:1,name:"Chicken Biriyani",category:"Biriyani & Rice",price:120,description:"Basmati rice, chicken and aromatic spices."},
 {id:2,name:"Mutton Biriyani",category:"Biriyani & Rice",price:180,description:"Slow-cooked mutton with fragrant biriyani rice."},
@@ -88,73 +97,12 @@ const DISHES=[
 {id:61,name:"Cold Coffee",category:"Drinks",price:90,description:"Chilled creamy coffee drink."},
 {id:62,name:"Masala Tea",category:"Drinks",price:30,description:"Hot Indian tea brewed with aromatic spices."}
 ];
-
 const STORAGE_KEY="spice-street-availability-v2";
-function getAvailability(){
-  const saved=localStorage.getItem(STORAGE_KEY);
-  if(saved)return JSON.parse(saved);
-  const initial={};
-  DISHES.forEach(d=>initial[d.id]=true);
-  initial[2]=false;
-  initial[58]=false;
-  return initial;
-}
+function getAvailability(){const saved=localStorage.getItem(STORAGE_KEY);if(saved)return JSON.parse(saved);const initial={};DISHES.forEach(d=>initial[d.id]=true);initial[2]=false;initial[58]=false;return initial}
 function saveAvailability(state){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
-
-function renderCustomer(){
-  const menu=document.getElementById("menu");
-  if(!menu)return;
-  const state=getAvailability();
-  const groups={};
-  DISHES.forEach(d=>{if(!groups[d.category])groups[d.category]=[];groups[d.category].push(d);});
-  let html="";
-  Object.entries(groups).forEach(([category,dishes])=>{
-    html+='<section class="category-section"><div class="category-heading"><div class="category-icon">'+(CATEGORIES[category]||"🍽️")+'</div><div><h2>'+category+'</h2><p>'+dishes.length+' items</p></div></div><div class="menu-grid">';
-    dishes.forEach(d=>{
-      const a=state[d.id];
-      html+='<article class="menu-card '+(a?"":"sold")+'"><div><div class="category">'+category+'</div><div class="dish-name">'+d.name+'</div><div class="description">'+d.description+'</div><div class="price">₹'+d.price+'</div></div><div class="badge '+(a?"on":"off")+'">'+(a?"✓ Available":"✕ Sold out")+'</div></article>';
-    });
-    html+='</div></section>';
-  });
-  menu.innerHTML=html;
-}
-
-function renderAdmin(){
-  const list=document.getElementById("adminMenu");
-  if(!list)return;
-  const state=getAvailability();
-  const available=DISHES.filter(d=>state[d.id]).length;
-  document.getElementById("availableCount").textContent=available;
-  document.getElementById("soldOutCount").textContent=DISHES.length-available;
-  let html="",lastCategory="";
-  DISHES.forEach(d=>{
-    const on=state[d.id];
-    if(lastCategory!==d.category){
-      html+='<div class="admin-category">'+(CATEGORIES[d.category]||"🍽️")+' '+d.category+'</div>';
-      lastCategory=d.category;
-    }
-    html+='<div class="admin-row"><div class="admin-info"><div class="admin-food-icon">'+(CATEGORIES[d.category]||"🍽️")+'</div><div><strong>'+d.name+'</strong><span>₹'+d.price+'</span></div></div><button class="toggle '+(on?"on":"off")+'" data-id="'+d.id+'">'+(on?"AVAILABLE":"SOLD OUT")+'</button></div>';
-  });
-  list.innerHTML=html;
-  list.querySelectorAll(".toggle").forEach(b=>b.addEventListener("click",()=>{
-    const s=getAvailability();
-    const id=Number(b.dataset.id);
-    s[id]=!s[id];
-    saveAvailability(s);
-    renderAdmin();
-  }));
-}
-
+function renderCustomer(){const menu=document.getElementById("menu");if(!menu)return;const state=getAvailability();const groups={};DISHES.forEach(d=>{if(!groups[d.category])groups[d.category]=[];groups[d.category].push(d)});let html="";Object.entries(groups).forEach(([category,dishes])=>{html+='<section class="category-section"><div class="category-heading"><div class="category-icon">'+(CATEGORIES[category]||"🍽️")+'</div><div><h2>'+category+'</h2><p>'+dishes.length+' items</p></div></div><div class="menu-grid">';dishes.forEach(d=>{const a=state[d.id];html+='<article class="menu-card '+(a?"":"sold")+'"><div><div class="category">'+category+'</div><div class="dish-name">'+d.name+'</div><div class="description">'+d.description+'</div><div class="price">₹'+d.price+'</div></div><div class="badge '+(a?"on":"off")+'">'+(a?"✓ Available":"✕ Sold out")+'</div></article>'});html+="</div></section>"});menu.innerHTML=html}
+function renderAdmin(){const list=document.getElementById("adminMenu");if(!list||!adminApp||adminApp.hidden)return;const state=getAvailability();const available=DISHES.filter(d=>state[d.id]).length;document.getElementById("availableCount").textContent=available;document.getElementById("soldOutCount").textContent=DISHES.length-available;let html="",lastCategory="";DISHES.forEach(d=>{const on=state[d.id];if(lastCategory!==d.category){html+='<div class="admin-category">'+(CATEGORIES[d.category]||"🍽️")+" "+d.category+"</div>";lastCategory=d.category}html+='<div class="admin-row"><div class="admin-info"><div class="admin-food-icon">'+(CATEGORIES[d.category]||"🍽️")+'</div><div><strong>'+d.name+'</strong><span>₹'+d.price+'</span></div></div><button class="toggle '+(on?"on":"off")+'" data-id="'+d.id+'">'+(on?"AVAILABLE":"SOLD OUT")+"</button></div>"});list.innerHTML=html;list.querySelectorAll(".toggle").forEach(b=>b.addEventListener("click",()=>{const s=getAvailability();const id=Number(b.dataset.id);s[id]=!s[id];saveAvailability(s);renderAdmin()}))}
 const resetBtn=document.getElementById("resetBtn");
-if(resetBtn)resetBtn.addEventListener("click",()=>{
-  if(confirm("Reset all dishes to available?")){
-    const s={};
-    DISHES.forEach(d=>s[d.id]=true);
-    saveAvailability(s);
-    renderAdmin();
-  }
-});
-
-window.addEventListener("storage",()=>{renderCustomer();renderAdmin();});
-renderCustomer();
-renderAdmin();
+if(resetBtn)resetBtn.addEventListener("click",()=>{if(confirm("Reset all dishes to available?")){const s={};DISHES.forEach(d=>s[d.id]=true);saveAvailability(s);renderAdmin()}});
+window.addEventListener("storage",()=>{renderCustomer();renderAdmin()});
+renderCustomer();renderAdmin();

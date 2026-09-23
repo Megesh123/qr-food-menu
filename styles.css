@@ -18,3 +18,22 @@
 .menu-preview .primary-btn{white-space:nowrap}
 body.light .primary-btn{background:var(--text);color:var(--card)}
 @media(max-width:620px){.landing-hero{padding:52px 5px}.landing-hero h2{letter-spacing:-2px}.feature-grid{grid-template-columns:1fr}.menu-preview{display:block}.menu-preview .primary-btn{margin-top:18px}.top-actions{flex-wrap:wrap}}
+
+.landing-page{background:radial-gradient(circle at 50% -10%,#2a2a2a 0,#101010 38%,#101010 70%)}
+body.light.landing-page{background:radial-gradient(circle at 50% -10%,#fff 0,#f7f7f5 45%,#f7f7f5 75%)}
+.landing-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.landing-stats>div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center}
+.landing-stats strong{display:block;font-size:27px;letter-spacing:-1px}
+.landing-stats span{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.login-screen{min-height:calc(100vh - 105px);display:grid;place-items:center;padding:28px 14px}
+.login-card{width:min(410px,100%);background:var(--card);border:1px solid var(--line);border-radius:22px;padding:30px;box-shadow:0 20px 70px rgba(0,0,0,.25)}
+.login-logo{width:50px;height:50px;display:grid;place-items:center;border-radius:15px;background:var(--chip);font-size:25px;margin-bottom:18px}
+.login-card h2{margin:4px 0 7px;font-size:28px}
+.login-sub{margin:0 0 22px;color:var(--muted);font-size:13px;line-height:1.5}
+.login-card label{display:block;font-size:12px;font-weight:800;margin:14px 0}
+.login-card input{display:block;width:100%;margin-top:7px;padding:12px 13px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;outline:none}
+.login-card input:focus{border-color:var(--muted)}
+.login-btn{width:100%;border:0;border-radius:11px;padding:13px;background:var(--text);color:var(--bg);font-weight:800;cursor:pointer;margin-top:8px}
+.login-error{min-height:16px;color:var(--red);font-size:12px;text-align:center;margin:10px 0 0}
+.test-note{display:block;text-align:center;color:var(--muted);font-size:10px;margin-top:16px}
+@media(max-width:620px){.landing-stats{grid-template-columns:1fr 1fr}.landing-stats>div:last-child{grid-column:1/-1}}

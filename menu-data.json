@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T11:52:11.372Z",
+  "updatedAt": "2026-09-23T11:56:28.680Z",
   "items": [
     {
       "id": 1,
@@ -558,6 +558,15 @@
       "price": 30,
       "description": "Hot Indian tea brewed with aromatic spices.",
       "veg": true,
+      "available": true
+    },
+    {
+      "id": 66,
+      "name": "Test Burger",
+      "category": "Burgers & Sandwiches",
+      "price": 99,
+      "description": "",
+      "veg": false,
       "available": true
     }
   ]

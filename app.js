@@ -255,7 +255,7 @@ function itemsFromState(state) {
   return DISHES.map(d => ({
     id: d.id, name: d.name, category: d.category,
     price: state.prices[d.id], description: d.description,
-    available: state.availability[d.id]
+    veg: d.veg !== false, available: state.availability[d.id]
   }));
 }
 // patch = { [id]: { available?: bool, price?: number } }

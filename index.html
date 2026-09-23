@@ -4,30 +4,50 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spice Street - Digital Menu</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=5">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=6">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
-<body>
+<body class="landing-page">
   <header class="topbar">
     <div>
-      <p class="eyebrow">DIGITAL MENU</p>
-      <h1>Spice Street</h1>
-      <p class="sub">Fresh food • Updated live</p>
+      <p class="eyebrow">SPICE STREET</p>
+      <h1>Digital Menu</h1>
+      <p class="sub">Fresh food • Live availability • Easy ordering</p>
     </div>
-    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button>
+    <div class="top-actions">
+      <a class="admin-link" href="customer">View Menu</a>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button>
+    </div>
   </header>
-  <main class="container">
-    <section class="hero">
-      <div><span class="status-dot"></span><strong>Today's menu</strong></div>
-      <p>Choose a category and check live availability before ordering.</p>
+
+  <main class="landing-container">
+    <section class="landing-hero">
+      <div class="landing-badge">🍽️ DIGITAL FOOD MENU</div>
+      <h2>Your menu.<br><span>Simple and live.</span></h2>
+      <p>Customers can scan, browse food by category, and instantly see what is available today.</p>
+      <div class="landing-actions">
+        <a class="primary-btn" href="customer">Open Digital Menu →</a>
+        <a class="secondary-link" href="#features">See Features</a>
+      </div>
     </section>
-    <div class="legend">
-      <span><i class="available"></i> Available</span>
-      <span><i class="unavailable"></i> Sold out</span>
-    </div>
-    <section id="menu" class="menu-sections"></section>
+
+    <section id="features" class="feature-grid">
+      <article class="feature-card"><div class="feature-icon">📱</div><h3>QR Ready</h3><p>One simple link for customers to scan and open your menu.</p></article>
+      <article class="feature-card"><div class="feature-icon">⚡</div><h3>Live Availability</h3><p>Show available and sold-out items clearly.</p></article>
+      <article class="feature-card"><div class="feature-icon">🍕</div><h3>Food Categories</h3><p>Keep pizzas, biriyani, desserts, drinks and more organized.</p></article>
+    </section>
+
+    <section class="menu-preview">
+      <div>
+        <p class="eyebrow">CUSTOMER EXPERIENCE</p>
+        <h2>Browse the full menu</h2>
+        <p>Open the customer menu to see all food categories and live item status.</p>
+      </div>
+      <a class="primary-btn" href="customer">View Customer Menu</a>
+    </section>
   </main>
-  <footer><p>Scan • Choose • Enjoy</p><small>Powered by your digital menu</small></footer>
-  <script src="app.js?v=5"></script>
+
+  <footer><p>Scan • Choose • Enjoy</p><small>Spice Street Digital Menu</small></footer>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

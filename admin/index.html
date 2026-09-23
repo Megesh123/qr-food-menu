@@ -14,8 +14,16 @@
 <section data-admin-section="menu" class="admin-section" hidden>
 <section id="syncPanel" class="sync-panel"><div class="sync-row"><span id="syncDot" class="sync-dot off" aria-hidden="true"></span><div class="sync-text" aria-live="polite"><strong id="syncTitle">Checking menu update…</strong><span id="syncDetail">Price and availability changes publish automatically.</span></div><div class="sync-actions"><button id="syncRetryBtn" class="sync-btn primary" type="button" hidden>Retry</button></div></div></section>
 <section class="admin-summary"><div><strong id="availableCount">0</strong><span>Available</span></div><div><strong id="soldOutCount">0</strong><span>Sold out</span></div><button id="resetBtn" class="secondary-btn">Reset All</button></section>
-<section class="add-dish-panel"><div class="section-heading"><div><p class="eyebrow">MENU CHANGE</p><h2>Add new dish</h2><p>Add a new item and publish it to the customer menu.</p></div></div>
+<div class="menu-change-toolbar">
+<div><p class="eyebrow">MENU CHANGE</p><h2>Manage dishes</h2><p>Update prices, availability and add new dishes.</p></div>
+<button id="addDishBtn" class="sync-btn primary add-dish-btn" type="button" aria-expanded="false">＋ Add New Dish</button>
+</div>
+<section id="addDishPanel" class="add-dish-panel" hidden><div class="section-heading"><div><p class="eyebrow">NEW DISH</p><h2>Add new dish</h2><p>Add a new item and publish it to the customer menu.</p></div></div>
 <form id="addDishForm" class="add-dish-form" autocomplete="off"><label>Dish name<input id="newDishName" type="text" placeholder="Example: Chicken Kebab" required></label><label>Category<input id="newDishCategory" type="text" placeholder="Example: Starters" required></label><label>Price<input id="newDishPrice" type="number" min="0" step="1" placeholder="150" required></label><label>Description<input id="newDishDescription" type="text" placeholder="Short description"></label><label class="check-label"><input id="newDishVeg" type="checkbox"> Vegetarian</label><button class="sync-btn primary" type="submit">Add Dish</button><p id="addDishMessage" class="sync-message" role="status"></p></form></section>
+<section class="menu-filters" aria-label="Menu filters"><strong>Filters</strong><div class="filter-row">
+<label>Status / Type<select id="adminMenuFilter"><option value="all">All dishes</option><option value="available">Available</option><option value="soldout">Sold out</option><option value="veg">Veg</option><option value="nonveg">Non-veg</option></select></label>
+<label>Category<select id="adminCategoryFilter"><option value="all">All categories</option><option value="Biriyani &amp; Rice">Biriyani & Rice</option><option value="Starters">Starters</option><option value="South Indian">South Indian</option><option value="Breads">Breads</option><option value="Curries">Curries</option><option value="Pizza">Pizza</option><option value="Burgers &amp; Sandwiches">Burgers & Sandwiches</option><option value="Chinese">Chinese</option><option value="Pasta">Pasta</option><option value="Desserts">Desserts</option><option value="Ice Cream">Ice Cream</option><option value="Drinks">Drinks</option></select></label>
+</div></section>
 <section id="adminMenu" class="admin-list"></section>
 </section></main>
-<script src="/app.js?v=20"></script></body></html>
+<script src="/app.js?v=21"></script></body></html>

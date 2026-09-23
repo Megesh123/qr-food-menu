@@ -584,9 +584,26 @@ const MASTER_CREDENTIAL_SHA256 = "3fd8ea76d8a4a2072a717edb267d982a8bc42a1cdc74d3
 function adminVisible() { return IS_ADMIN && !adminApp.hidden; }
 function masterVisible() { return IS_MASTER_ADMIN && !masterApp.hidden; }
 
+let adminMenuFilter = "all";
+let adminCategoryFilter = "all";
+
+function matchesAdminFilter(d, state) {
+  switch (adminMenuFilter) {
+    case "available": return state.availability[d.id] === true;
+    case "soldout": return state.availability[d.id] === false;
+    case "veg": return d.veg !== false;
+    case "nonveg": return d.veg === false;
+    default: return true;
+  }
+}
+
 function buildAdminList(state) {
   let html = "", lastCategory = "";
-  DISHES.forEach(d => {
+  const filtered = DISHES.filter(d => {
+    const categoryOk = adminCategoryFilter === "all" || d.category === adminCategoryFilter;
+    return categoryOk && matchesAdminFilter(d, state);
+  });
+  filtered.forEach(d => {
     const icon = CATEGORIES[d.category] || "🍽️";
     if (lastCategory !== d.category) {
       html += '<div class="admin-category">' + icon + " " + esc(d.category) + "</div>";
@@ -600,10 +617,10 @@ function buildAdminList(state) {
       '<button class="price-save" type="submit">Save</button></form></div></div>' +
       '<button class="toggle" type="button" data-id="' + d.id + '"></button></div>';
   });
+  if (!filtered.length) html = '<div class="empty-state"><strong>No dishes found.</strong><span>Try a different filter.</span></div>';
   return html;
 }
-// Builds the list once, then updates rows in place so that a price the admin
-// is still typing is never wiped by a re-render or a background sync.
+
 function renderAdmin() {
   const list = $("adminMenu");
   if (!list || !adminVisible()) return;
@@ -611,22 +628,7 @@ function renderAdmin() {
   const available = DISHES.filter(d => state.availability[d.id]).length;
   $("availableCount").textContent = available;
   $("soldOutCount").textContent = DISHES.length - available;
-  if (!list.querySelector(".admin-row")) list.innerHTML = buildAdminList(state);
-  DISHES.forEach(d => {
-    const row = list.querySelector('[data-row="' + d.id + '"]');
-    if (!row) return;
-    const on = state.availability[d.id];
-    const btn = row.querySelector(".toggle");
-    btn.className = "toggle " + (on ? "on" : "off");
-    btn.textContent = on ? "AVAILABLE" : "SOLD OUT";
-    btn.setAttribute("aria-pressed", on ? "true" : "false");
-    const input = row.querySelector(".price-input");
-    const saved = String(state.prices[d.id]);
-    if (input.dataset.saved !== saved) {
-      if (input.value === input.dataset.saved) input.value = saved; // untouched → show the new saved price
-      input.dataset.saved = saved;
-    }
-  });
+  list.innerHTML = buildAdminList(state);
   renderSyncStatus();
 }
 function renderAll() { renderCustomer(); renderAdmin(); }
@@ -1230,6 +1232,28 @@ function bindAddDishForm() {
     if (result.ok) form.reset();
   });
 }
+function initAdminMenuControls() {
+  const panel = $("addDishPanel");
+  const addBtn = $("addDishBtn");
+  if (addBtn && panel) {
+    addBtn.addEventListener("click", () => {
+      const opening = panel.hidden;
+      panel.hidden = !opening;
+      addBtn.setAttribute("aria-expanded", opening ? "true" : "false");
+      if (opening) setTimeout(() => $("newDishName")?.focus(), 50);
+    });
+  }
+  const filter = $("adminMenuFilter");
+  if (filter) filter.addEventListener("change", () => {
+    adminMenuFilter = filter.value;
+    renderAdmin();
+  });
+  const category = $("adminCategoryFilter");
+  if (category) category.addEventListener("change", () => {
+    adminCategoryFilter = category.value;
+    renderAdmin();
+  });
+}
 function initAdmin() {
   const loginForm = $("loginForm");
   if (loginForm) {
@@ -1264,6 +1288,7 @@ function initAdmin() {
   if (resetBtn) resetBtn.addEventListener("click", () => { if (confirm("Reset all dishes to available?")) resetAllAvailable(); });
   document.querySelectorAll("[data-admin-nav]").forEach(btn => btn.addEventListener("click", () => showAdminSection(btn.dataset.adminNav)));
   bindAddDishForm();
+  initAdminMenuControls();
   showAdminSection("monitor");
 
   const settingsBtn = $("syncSettingsBtn");

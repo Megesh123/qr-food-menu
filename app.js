@@ -1461,7 +1461,13 @@ async function boot() {
   if (IS_MASTER_ADMIN) return;
   if (!hasMenuPage) return;
   initCustomerTools();
-  fetchAnalyticsConfig().then(startAnalyticsTracking);
+  fetchAnalyticsConfig().then(() => {
+    if (IS_ADMIN) {
+      renderMonitor();
+    } else {
+      startAnalyticsTracking();
+    }
+  });
   const haveLocal = hasLocalState();
   if (haveLocal) renderAll();
   await syncFromPublished();        // first-time visitors wait for the real menu

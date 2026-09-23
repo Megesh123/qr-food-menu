@@ -1,3 +1,23 @@
+const THEME_KEY="spice-street-theme-v1";
+function applyTheme(){
+  const saved=localStorage.getItem(THEME_KEY);
+  const theme=saved==="light"?"light":"dark";
+  document.body.classList.toggle("light",theme==="light");
+  const btn=document.getElementById("themeToggle");
+  if(btn){
+    btn.textContent=theme==="dark"?"☀️ Light":"🌙 Dark";
+    btn.setAttribute("aria-label",theme==="dark"?"Switch to light theme":"Switch to dark theme");
+  }
+}
+function toggleTheme(){
+  const next=document.body.classList.contains("light")?"dark":"light";
+  localStorage.setItem(THEME_KEY,next);
+  applyTheme();
+}
+const themeToggle=document.getElementById("themeToggle");
+if(themeToggle)themeToggle.addEventListener("click",toggleTheme);
+applyTheme();
+
 const CATEGORIES={
   "Biriyani & Rice":"🍚","Starters":"🍗","South Indian":"🥘","Breads":"🫓",
   "Curries":"🍛","Pizza":"🍕","Burgers & Sandwiches":"🍔","Chinese":"🥡",

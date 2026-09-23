@@ -6,8 +6,8 @@
   <meta name="description" content="Spice Street customer menu with food categories, prices and live availability.">
   <link rel="canonical" href="https://menu.nexgenlink.co.in/customer">
   <title>Spice Street - Digital Menu</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=14">
-  <link rel="stylesheet" href="/styles.css?v=14">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=15">
+  <link rel="stylesheet" href="/styles.css?v=15">
 </head>
 <body>
   <header class="topbar">
@@ -28,9 +28,25 @@
       <span><i class="available"></i> Available</span>
       <span><i class="unavailable"></i> Sold out</span>
     </div>
+    <section class="menu-tools" aria-label="Search and filter the menu">
+      <div class="search-field">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input id="menuSearch" type="search" placeholder="Search dishes… (press /)" autocomplete="off"
+               autocapitalize="off" spellcheck="false" aria-label="Search dishes" aria-controls="menu">
+        <button id="searchClear" class="search-clear" type="button" aria-label="Clear search" hidden>✕</button>
+      </div>
+      <div class="chip-row" id="dietFilters" role="group" aria-label="Filter dishes">
+        <button class="chip is-active" type="button" data-diet="all" aria-pressed="true">All</button>
+        <button class="chip" type="button" data-diet="veg" aria-pressed="false"><i class="diet-mark" aria-hidden="true"></i>Veg</button>
+        <button class="chip" type="button" data-diet="nonveg" aria-pressed="false"><i class="diet-mark nonveg" aria-hidden="true"></i>Non-veg</button>
+        <button class="chip" id="availableOnly" type="button" data-available-only="true" aria-pressed="false">Available now</button>
+      </div>
+      <p id="menuCount" class="menu-count" role="status" aria-live="polite"></p>
+      <div class="chip-row" id="categoryJump" role="group" aria-label="Jump to a category"></div>
+    </section>
     <section id="menu" class="menu-sections"><p class="menu-loading">Loading today’s menu…</p></section>
   </main>
   <footer><p>Scan • Choose • Enjoy</p><small>Powered by your digital menu</small></footer>
-  <script src="/app.js?v=14"></script>
+  <script src="/app.js?v=15"></script>
 </body>
 </html>

@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+# Prefix match, so this also covers /admin/ and the /admin.html redirect stub.
 Disallow: /admin
+# /customer.html is left crawlable on purpose: it is only a redirect stub and
+# carries a noindex tag, which has to be seen to take effect.
 Sitemap: https://menu.nexgenlink.co.in/sitemap.xml

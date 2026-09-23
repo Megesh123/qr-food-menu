@@ -47,72 +47,75 @@ const CATEGORIES = {
   "Pasta": "🍝", "Desserts": "🍰", "Ice Cream": "🍨", "Drinks": "🥤"
 };
 const DISHES = [
-{id:1,name:"Chicken Biriyani",category:"Biriyani & Rice",price:120,description:"Basmati rice, chicken and aromatic spices."},
-{id:2,name:"Mutton Biriyani",category:"Biriyani & Rice",price:180,description:"Slow-cooked mutton with fragrant biriyani rice."},
-{id:3,name:"Egg Biriyani",category:"Biriyani & Rice",price:110,description:"Fragrant biriyani rice with seasoned boiled egg."},
-{id:4,name:"Veg Biriyani",category:"Biriyani & Rice",price:100,description:"Basmati rice cooked with fresh vegetables and spices."},
-{id:5,name:"Mushroom Biriyani",category:"Biriyani & Rice",price:120,description:"Aromatic rice with tender mushrooms and herbs."},
-{id:6,name:"Jeera Rice",category:"Biriyani & Rice",price:80,description:"Steamed basmati rice tempered with cumin."},
-{id:7,name:"Chicken 65",category:"Starters",price:110,description:"Crispy, spicy South Indian chicken starter."},
-{id:8,name:"Paneer 65",category:"Starters",price:100,description:"Crispy paneer tossed with Indian spices."},
-{id:9,name:"Chicken Lollipop",category:"Starters",price:150,description:"Crispy chicken wings coated in spicy masala."},
-{id:10,name:"Gobi 65",category:"Starters",price:90,description:"Crispy cauliflower with chilli and curry leaves."},
-{id:11,name:"Mushroom Pepper Fry",category:"Starters",price:100,description:"Mushroom tossed with cracked pepper and onions."},
-{id:12,name:"Idli",category:"South Indian",price:40,description:"Soft steamed rice cakes served with chutney and sambar."},
-{id:13,name:"Vada",category:"South Indian",price:45,description:"Crispy lentil fritter served with chutney."},
-{id:14,name:"Plain Dosa",category:"South Indian",price:55,description:"Golden crispy dosa with chutney and sambar."},
-{id:15,name:"Masala Dosa",category:"South Indian",price:80,description:"Crispy dosa filled with seasoned potato masala."},
-{id:16,name:"Ghee Roast Dosa",category:"South Indian",price:95,description:"Thin dosa roasted with aromatic ghee."},
-{id:17,name:"Pongal",category:"South Indian",price:60,description:"Comforting rice and lentil pongal with ghee."},
-{id:18,name:"Veg Meals",category:"South Indian",price:100,description:"Rice, vegetables, sambar, rasam and sides."},
-{id:19,name:"Parotta",category:"Breads",price:25,description:"Flaky layered South Indian flatbread."},
-{id:20,name:"Egg Parotta",category:"Breads",price:70,description:"Layered parotta tossed with egg and spices."},
-{id:21,name:"Chapati",category:"Breads",price:35,description:"Soft whole-wheat flatbread."},
-{id:22,name:"Butter Naan",category:"Breads",price:55,description:"Soft naan brushed with butter."},
-{id:23,name:"Garlic Naan",category:"Breads",price:65,description:"Tandoor-baked naan with garlic and coriander."},
-{id:24,name:"Chicken Curry",category:"Curries",price:130,description:"Homestyle chicken curry with rich spices."},
-{id:25,name:"Mutton Curry",category:"Curries",price:180,description:"Tender mutton cooked in a traditional masala."},
-{id:26,name:"Fish Curry",category:"Curries",price:150,description:"South Indian fish curry with tangy spices."},
-{id:27,name:"Paneer Butter Masala",category:"Curries",price:130,description:"Paneer in a creamy tomato and butter gravy."},
-{id:28,name:"Dal Tadka",category:"Curries",price:90,description:"Yellow lentils finished with a fragrant tempering."},
-{id:29,name:"Margherita Pizza",category:"Pizza",price:180,description:"Tomato, mozzarella and basil on a crisp base."},
-{id:30,name:"Veggie Pizza",category:"Pizza",price:220,description:"Onion, capsicum, corn and tomato with cheese."},
-{id:31,name:"Paneer Tikka Pizza",category:"Pizza",price:250,description:"Paneer tikka, onion and capsicum with cheese."},
-{id:32,name:"Chicken Tikka Pizza",category:"Pizza",price:280,description:"Chicken tikka, onion and capsicum on a cheesy base."},
-{id:33,name:"Cheese Burst Pizza",category:"Pizza",price:260,description:"Loaded cheese pizza with a rich cheese-filled crust."},
-{id:34,name:"Classic Veg Burger",category:"Burgers & Sandwiches",price:100,description:"Crispy veg patty with lettuce, tomato and sauce."},
-{id:35,name:"Chicken Burger",category:"Burgers & Sandwiches",price:140,description:"Juicy chicken patty with fresh salad and sauce."},
-{id:36,name:"Paneer Burger",category:"Burgers & Sandwiches",price:130,description:"Spiced paneer patty with creamy sauce."},
-{id:37,name:"Grilled Cheese Sandwich",category:"Burgers & Sandwiches",price:90,description:"Toasted bread with melted cheese and herbs."},
-{id:38,name:"Chicken Club Sandwich",category:"Burgers & Sandwiches",price:150,description:"Triple-layer sandwich with chicken, egg and salad."},
-{id:39,name:"Veg Hakka Noodles",category:"Chinese",price:120,description:"Wok-tossed noodles with vegetables and sauces."},
-{id:40,name:"Chicken Hakka Noodles",category:"Chinese",price:150,description:"Wok-tossed noodles with chicken and vegetables."},
-{id:41,name:"Veg Fried Rice",category:"Chinese",price:110,description:"Fragrant fried rice with fresh vegetables."},
-{id:42,name:"Chicken Fried Rice",category:"Chinese",price:140,description:"Wok-fried rice with chicken, egg and vegetables."},
-{id:43,name:"Gobi Manchurian",category:"Chinese",price:110,description:"Crispy cauliflower in a tangy Manchurian sauce."},
-{id:44,name:"White Sauce Pasta",category:"Pasta",price:150,description:"Creamy pasta with herbs and vegetables."},
-{id:45,name:"Arrabbiata Pasta",category:"Pasta",price:140,description:"Pasta in a spicy tomato and garlic sauce."},
-{id:46,name:"Chicken Alfredo Pasta",category:"Pasta",price:190,description:"Creamy Alfredo pasta with tender chicken."},
-{id:47,name:"Pesto Veg Pasta",category:"Pasta",price:170,description:"Pasta tossed with basil pesto and vegetables."},
-{id:48,name:"Gulab Jamun",category:"Desserts",price:50,description:"Soft milk-solid dumplings in sugar syrup."},
-{id:49,name:"Brownie",category:"Desserts",price:80,description:"Warm chocolate brownie with a rich fudgy center."},
-{id:50,name:"Chocolate Cake",category:"Desserts",price:90,description:"Moist chocolate cake with creamy frosting."},
-{id:51,name:"Carrot Halwa",category:"Desserts",price:70,description:"Slow-cooked carrot dessert with milk and nuts."},
-{id:52,name:"Payasam",category:"Desserts",price:60,description:"Traditional South Indian milk and vermicelli dessert."},
-{id:53,name:"Vanilla Ice Cream",category:"Ice Cream",price:60,description:"Classic creamy vanilla scoop."},
-{id:54,name:"Chocolate Ice Cream",category:"Ice Cream",price:70,description:"Rich chocolate ice cream scoop."},
-{id:55,name:"Mango Ice Cream",category:"Ice Cream",price:70,description:"Creamy seasonal mango ice cream."},
-{id:56,name:"Ice Cream Sundae",category:"Ice Cream",price:110,description:"Scoops topped with chocolate sauce and nuts."},
-{id:57,name:"Lime Juice",category:"Drinks",price:30,description:"Fresh lime juice served chilled."},
-{id:58,name:"Fresh Fruit Juice",category:"Drinks",price:60,description:"Seasonal fresh fruit juice."},
-{id:59,name:"Mango Juice",category:"Drinks",price:70,description:"Refreshing mango juice."},
-{id:60,name:"Fresh Lime Soda",category:"Drinks",price:40,description:"Chilled lime soda with a refreshing fizz."},
-{id:61,name:"Cold Coffee",category:"Drinks",price:90,description:"Chilled creamy coffee drink."},
-{id:62,name:"Masala Tea",category:"Drinks",price:30,description:"Hot Indian tea brewed with aromatic spices."}
+{id:1,name:"Chicken Biriyani",category:"Biriyani & Rice",price:120,description:"Basmati rice, chicken and aromatic spices.",veg:false},
+{id:2,name:"Mutton Biriyani",category:"Biriyani & Rice",price:180,description:"Slow-cooked mutton with fragrant biriyani rice.",veg:false},
+{id:3,name:"Egg Biriyani",category:"Biriyani & Rice",price:110,description:"Fragrant biriyani rice with seasoned boiled egg.",veg:false},
+{id:4,name:"Veg Biriyani",category:"Biriyani & Rice",price:100,description:"Basmati rice cooked with fresh vegetables and spices.",veg:true},
+{id:5,name:"Mushroom Biriyani",category:"Biriyani & Rice",price:120,description:"Aromatic rice with tender mushrooms and herbs.",veg:true},
+{id:6,name:"Jeera Rice",category:"Biriyani & Rice",price:80,description:"Steamed basmati rice tempered with cumin.",veg:true},
+{id:7,name:"Chicken 65",category:"Starters",price:110,description:"Crispy, spicy South Indian chicken starter.",veg:false},
+{id:8,name:"Paneer 65",category:"Starters",price:100,description:"Crispy paneer tossed with Indian spices.",veg:true},
+{id:9,name:"Chicken Lollipop",category:"Starters",price:150,description:"Crispy chicken wings coated in spicy masala.",veg:false},
+{id:10,name:"Gobi 65",category:"Starters",price:90,description:"Crispy cauliflower with chilli and curry leaves.",veg:true},
+{id:11,name:"Mushroom Pepper Fry",category:"Starters",price:100,description:"Mushroom tossed with cracked pepper and onions.",veg:true},
+{id:12,name:"Idli",category:"South Indian",price:40,description:"Soft steamed rice cakes served with chutney and sambar.",veg:true},
+{id:13,name:"Vada",category:"South Indian",price:45,description:"Crispy lentil fritter served with chutney.",veg:true},
+{id:14,name:"Plain Dosa",category:"South Indian",price:55,description:"Golden crispy dosa with chutney and sambar.",veg:true},
+{id:15,name:"Masala Dosa",category:"South Indian",price:80,description:"Crispy dosa filled with seasoned potato masala.",veg:true},
+{id:16,name:"Ghee Roast Dosa",category:"South Indian",price:95,description:"Thin dosa roasted with aromatic ghee.",veg:true},
+{id:17,name:"Pongal",category:"South Indian",price:60,description:"Comforting rice and lentil pongal with ghee.",veg:true},
+{id:18,name:"Veg Meals",category:"South Indian",price:100,description:"Rice, vegetables, sambar, rasam and sides.",veg:true},
+{id:19,name:"Parotta",category:"Breads",price:25,description:"Flaky layered South Indian flatbread.",veg:true},
+{id:20,name:"Egg Parotta",category:"Breads",price:70,description:"Layered parotta tossed with egg and spices.",veg:false},
+{id:21,name:"Chapati",category:"Breads",price:35,description:"Soft whole-wheat flatbread.",veg:true},
+{id:22,name:"Butter Naan",category:"Breads",price:55,description:"Soft naan brushed with butter.",veg:true},
+{id:23,name:"Garlic Naan",category:"Breads",price:65,description:"Tandoor-baked naan with garlic and coriander.",veg:true},
+{id:24,name:"Chicken Curry",category:"Curries",price:130,description:"Homestyle chicken curry with rich spices.",veg:false},
+{id:25,name:"Mutton Curry",category:"Curries",price:180,description:"Tender mutton cooked in a traditional masala.",veg:false},
+{id:26,name:"Fish Curry",category:"Curries",price:150,description:"South Indian fish curry with tangy spices.",veg:false},
+{id:27,name:"Paneer Butter Masala",category:"Curries",price:130,description:"Paneer in a creamy tomato and butter gravy.",veg:true},
+{id:28,name:"Dal Tadka",category:"Curries",price:90,description:"Yellow lentils finished with a fragrant tempering.",veg:true},
+{id:29,name:"Margherita Pizza",category:"Pizza",price:180,description:"Tomato, mozzarella and basil on a crisp base.",veg:true},
+{id:30,name:"Veggie Pizza",category:"Pizza",price:220,description:"Onion, capsicum, corn and tomato with cheese.",veg:true},
+{id:31,name:"Paneer Tikka Pizza",category:"Pizza",price:250,description:"Paneer tikka, onion and capsicum with cheese.",veg:true},
+{id:32,name:"Chicken Tikka Pizza",category:"Pizza",price:280,description:"Chicken tikka, onion and capsicum on a cheesy base.",veg:false},
+{id:33,name:"Cheese Burst Pizza",category:"Pizza",price:260,description:"Loaded cheese pizza with a rich cheese-filled crust.",veg:true},
+{id:34,name:"Classic Veg Burger",category:"Burgers & Sandwiches",price:100,description:"Crispy veg patty with lettuce, tomato and sauce.",veg:true},
+{id:35,name:"Chicken Burger",category:"Burgers & Sandwiches",price:140,description:"Juicy chicken patty with fresh salad and sauce.",veg:false},
+{id:36,name:"Paneer Burger",category:"Burgers & Sandwiches",price:130,description:"Spiced paneer patty with creamy sauce.",veg:true},
+{id:37,name:"Grilled Cheese Sandwich",category:"Burgers & Sandwiches",price:90,description:"Toasted bread with melted cheese and herbs.",veg:true},
+{id:38,name:"Chicken Club Sandwich",category:"Burgers & Sandwiches",price:150,description:"Triple-layer sandwich with chicken, egg and salad.",veg:false},
+{id:39,name:"Veg Hakka Noodles",category:"Chinese",price:120,description:"Wok-tossed noodles with vegetables and sauces.",veg:true},
+{id:40,name:"Chicken Hakka Noodles",category:"Chinese",price:150,description:"Wok-tossed noodles with chicken and vegetables.",veg:false},
+{id:41,name:"Veg Fried Rice",category:"Chinese",price:110,description:"Fragrant fried rice with fresh vegetables.",veg:true},
+{id:42,name:"Chicken Fried Rice",category:"Chinese",price:140,description:"Wok-fried rice with chicken, egg and vegetables.",veg:false},
+{id:43,name:"Gobi Manchurian",category:"Chinese",price:110,description:"Crispy cauliflower in a tangy Manchurian sauce.",veg:true},
+{id:44,name:"White Sauce Pasta",category:"Pasta",price:150,description:"Creamy pasta with herbs and vegetables.",veg:true},
+{id:45,name:"Arrabbiata Pasta",category:"Pasta",price:140,description:"Pasta in a spicy tomato and garlic sauce.",veg:true},
+{id:46,name:"Chicken Alfredo Pasta",category:"Pasta",price:190,description:"Creamy Alfredo pasta with tender chicken.",veg:false},
+{id:47,name:"Pesto Veg Pasta",category:"Pasta",price:170,description:"Pasta tossed with basil pesto and vegetables.",veg:true},
+{id:48,name:"Gulab Jamun",category:"Desserts",price:50,description:"Soft milk-solid dumplings in sugar syrup.",veg:true},
+{id:49,name:"Brownie",category:"Desserts",price:80,description:"Warm chocolate brownie with a rich fudgy center.",veg:true},
+{id:50,name:"Chocolate Cake",category:"Desserts",price:90,description:"Moist chocolate cake with creamy frosting.",veg:true},
+{id:51,name:"Carrot Halwa",category:"Desserts",price:70,description:"Slow-cooked carrot dessert with milk and nuts.",veg:true},
+{id:52,name:"Payasam",category:"Desserts",price:60,description:"Traditional South Indian milk and vermicelli dessert.",veg:true},
+{id:53,name:"Vanilla Ice Cream",category:"Ice Cream",price:60,description:"Classic creamy vanilla scoop.",veg:true},
+{id:54,name:"Chocolate Ice Cream",category:"Ice Cream",price:70,description:"Rich chocolate ice cream scoop.",veg:true},
+{id:55,name:"Mango Ice Cream",category:"Ice Cream",price:70,description:"Creamy seasonal mango ice cream.",veg:true},
+{id:56,name:"Ice Cream Sundae",category:"Ice Cream",price:110,description:"Scoops topped with chocolate sauce and nuts.",veg:true},
+{id:57,name:"Lime Juice",category:"Drinks",price:30,description:"Fresh lime juice served chilled.",veg:true},
+{id:58,name:"Fresh Fruit Juice",category:"Drinks",price:60,description:"Seasonal fresh fruit juice.",veg:true},
+{id:59,name:"Mango Juice",category:"Drinks",price:70,description:"Refreshing mango juice.",veg:true},
+{id:60,name:"Fresh Lime Soda",category:"Drinks",price:40,description:"Chilled lime soda with a refreshing fizz.",veg:true},
+{id:61,name:"Cold Coffee",category:"Drinks",price:90,description:"Chilled creamy coffee drink.",veg:true},
+{id:62,name:"Masala Tea",category:"Drinks",price:30,description:"Hot Indian tea brewed with aromatic spices.",veg:true}
 ];
 const DISH_BY_ID = new Map(DISHES.map(d => [d.id, d]));
 
 /* ---------------------------------------------------------- Configuration */
+// sha256("admin:admin") — the default admin credential (see "Admin sign-in").
+const DEFAULT_CREDENTIAL_SHA256 = "8da193366e1554c08b2870c50f737b9587c3372b656151c4a96028af26f51334";
+
 // A page may override these before app.js loads: window.SPICE_STREET_CONFIG = {...}
 const CONFIG = Object.assign({
   repo: "Megesh123/qr-food-menu",   // GitHub repository that hosts this site
@@ -124,7 +127,16 @@ const CONFIG = Object.assign({
   customerPollMs: 60 * 1000,        // how often the customer menu re-checks
   adminPollMs: 30 * 1000,
   liveCheckPollMs: 8 * 1000,        // faster polling right after a publish
-  liveCheckMaxMs: 6 * 60 * 1000
+  liveCheckMaxMs: 6 * 60 * 1000,
+  /* Admin sign-in. Only the SHA-256 hash of "username:passcode" is kept here,
+     so the passcode itself never appears in the page source. The default hash
+     below is sha256("admin:admin") — replace it with your own, see README:
+       window.SPICE_STREET_CONFIG = { adminCredentialSha256: "…" }
+     Generate one in the browser console:
+       SpiceStreetMenu.hashCredentials("yourname", "your passcode")            */
+  adminCredentialSha256: DEFAULT_CREDENTIAL_SHA256,
+  adminMaxAttempts: 5,              // wrong tries before the form locks
+  adminLockMs: 30 * 1000            // ...and for how long
 }, window.SPICE_STREET_CONFIG || {});
 
 // menu-data.json lives next to app.js, wherever the site is hosted.
@@ -231,29 +243,298 @@ function hasLocalState() { try { return localStorage.getItem(MENU_STATE_KEY) !==
 function loadState() { return normalizeState(readJSON(localStorage, MENU_STATE_KEY, null)); }
 function saveState(state) { writeJSON(localStorage, MENU_STATE_KEY, state); }
 
+/* -------------------------------------------------------- Admin passcode */
+// The sign-in credential is checked as a SHA-256 hash, never as a plaintext
+// string, so "admin / admin" is not readable in the page source any more.
+// DEFAULT_CREDENTIAL_SHA256 (declared with the configuration above) is the
+// out-of-the-box credential; replace it as described in the README.
+const LOGIN_ATTEMPTS_KEY = "spice-street-login-attempts-v1";
+
+const SHA256_K = [
+  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+];
+function rotr32(x, n) { return ((x >>> n) | (x << (32 - n))) >>> 0; }
+function utf8Bytes(text) {
+  if (typeof TextEncoder === "function") return new TextEncoder().encode(text);
+  const s = unescape(encodeURIComponent(text));            // very old browsers
+  const out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out;
+}
+function toHex(bytes) {
+  let out = "";
+  for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, "0");
+  return out;
+}
+// Used only when Web Crypto is unavailable (non-secure context, e.g. http://LAN).
+function sha256Pure(text) {
+  const bytes = utf8Bytes(text);
+  const len = bytes.length;
+  const blocks = Math.ceil((len + 9) / 64);
+  const buf = new Uint8Array(blocks * 64);
+  buf.set(bytes);
+  buf[len] = 0x80;
+  const view = new DataView(buf.buffer);
+  const bits = len * 8;
+  view.setUint32(blocks * 64 - 8, Math.floor(bits / 4294967296));
+  view.setUint32(blocks * 64 - 4, bits >>> 0);
+  const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+  const w = new Uint32Array(64);
+  for (let blk = 0; blk < blocks; blk++) {
+    const off = blk * 64;
+    for (let i = 0; i < 16; i++) w[i] = view.getUint32(off + i * 4);
+    for (let i = 16; i < 64; i++) {
+      const s0 = rotr32(w[i - 15], 7) ^ rotr32(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+      const s1 = rotr32(w[i - 2], 17) ^ rotr32(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
+    }
+    let a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+    for (let i = 0; i < 64; i++) {
+      const S1 = rotr32(e, 6) ^ rotr32(e, 11) ^ rotr32(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const t1 = (h + S1 + ch + SHA256_K[i] + w[i]) >>> 0;
+      const S0 = rotr32(a, 2) ^ rotr32(a, 13) ^ rotr32(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const t2 = (S0 + maj) >>> 0;
+      h = g; g = f; f = e; e = (d + t1) >>> 0;
+      d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0; H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+    H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0; H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+  }
+  const out = new Uint8Array(32);
+  const outView = new DataView(out.buffer);
+  for (let i = 0; i < 8; i++) outView.setUint32(i * 4, H[i]);
+  return toHex(out);
+}
+async function sha256Hex(text) {
+  const subtle = (typeof crypto !== "undefined" && crypto) ? crypto.subtle : null;
+  if (subtle && typeof subtle.digest === "function") {
+    try { return toHex(new Uint8Array(await subtle.digest("SHA-256", utf8Bytes(text)))); }
+    catch (e) { /* fall through to the pure-JS implementation */ }
+  }
+  return sha256Pure(text);
+}
+// Hash of "username:passcode" — the value stored in CONFIG.adminCredentialSha256.
+async function hashCredentials(username, passcode) {
+  return sha256Hex(String(username || "").trim().toLowerCase() + ":" + String(passcode || ""));
+}
+// Length-independent, branch-free comparison of two hex digests.
+function sameDigest(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+function readAttempts() {
+  const raw = readJSON(localStorage, LOGIN_ATTEMPTS_KEY, null) || {};
+  return { count: Math.max(0, Number(raw.count) || 0), lockedUntil: Number(raw.lockedUntil) || 0 };
+}
+function writeAttempts(a) { writeJSON(localStorage, LOGIN_ATTEMPTS_KEY, a); }
+function lockRemaining() { return Math.max(0, readAttempts().lockedUntil - Date.now()); }
+
 /* ------------------------------------------------------------- Rendering */
+/* Customer menu filters ---------------------------------------------------
+   The search box and the diet / availability chips only change what is shown
+   on screen; menu-data.json stays the source of truth for prices & status. */
+const menuFilter = { query: "", diet: "all", availableOnly: false };
+
+function slugify(text) {
+  return String(text).toLowerCase().trim()
+    .replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+// Escapes each slice separately, so a query can never inject markup (and can
+// never match inside an escaped entity such as "&amp;").
+function escHighlight(text, query) {
+  const raw = text == null ? "" : String(text);
+  const q = String(query || "").trim();
+  if (!q) return esc(raw);
+  const lower = raw.toLowerCase(), target = q.toLowerCase();
+  if (lower.indexOf(target) === -1) return esc(raw);
+  let out = "", from = 0, idx;
+  while ((idx = lower.indexOf(target, from)) !== -1) {
+    out += esc(raw.slice(from, idx)) + "<mark>" + esc(raw.slice(idx, idx + target.length)) + "</mark>";
+    from = idx + target.length;
+  }
+  return out + esc(raw.slice(from));
+}
+
+function dietMark(d) {
+  const label = d.veg ? "Vegetarian" : "Non-vegetarian";
+  return '<span class="diet-mark' + (d.veg ? "" : " nonveg") + '" title="' + label + '" aria-label="' + label + '"></span>';
+}
+
+// Every word of the query has to appear in the name, description or category,
+// so "veg noodles" and "noodles veg" both work.
+function matchesFilter(dish, state) {
+  if (menuFilter.diet === "veg" && !dish.veg) return false;
+  if (menuFilter.diet === "nonveg" && dish.veg) return false;
+  if (menuFilter.availableOnly && !state.availability[dish.id]) return false;
+  const words = menuFilter.query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  const haystack = (dish.name + " " + dish.description + " " + dish.category).toLowerCase();
+  return words.every(w => haystack.indexOf(w) !== -1);
+}
+
+function filtersActive() {
+  return Boolean(menuFilter.query.trim()) || menuFilter.diet !== "all" || menuFilter.availableOnly;
+}
+
 function renderCustomer() {
   const menu = $("menu");
   if (!menu) return;
   const state = loadState();
-  const groups = {};
-  DISHES.forEach(d => { (groups[d.category] = groups[d.category] || []).push(d); });
+  const q = menuFilter.query.trim();
+  const groups = new Map();
+  let shown = 0;
+  DISHES.forEach(d => {
+    if (!matchesFilter(d, state)) return;
+    if (!groups.has(d.category)) groups.set(d.category, []);
+    groups.get(d.category).push(d);
+    shown++;
+  });
+
   let html = "";
-  Object.entries(groups).forEach(([category, dishes]) => {
-    html += '<section class="category-section"><div class="category-heading"><div class="category-icon">' + (CATEGORIES[category] || "🍽️") +
-      '</div><div><h2>' + esc(category) + '</h2><p>' + dishes.length + ' items</p></div></div><div class="menu-grid">';
+  groups.forEach((dishes, category) => {
+    html += '<section class="category-section" id="cat-' + slugify(category) + '"><div class="category-heading"><div class="category-icon">' +
+      (CATEGORIES[category] || "🍽️") + '</div><div><h2>' + esc(category) + '</h2><p>' + dishes.length +
+      (dishes.length === 1 ? " item" : " items") + '</p></div></div><div class="menu-grid">';
     dishes.forEach(d => {
       const on = state.availability[d.id];
-      html += '<article class="menu-card ' + (on ? "" : "sold") + '"><div><div class="category">' + esc(category) +
-        '</div><div class="dish-name">' + esc(d.name) + '</div><div class="description">' + esc(d.description) +
+      html += '<article class="menu-card' + (on ? "" : " sold") + '"><div><div class="category">' + dietMark(d) + esc(category) +
+        '</div><div class="dish-name">' + escHighlight(d.name, q) + '</div><div class="description">' + escHighlight(d.description, q) +
         '</div><div class="price">₹' + state.prices[d.id] + '</div></div><div class="badge ' + (on ? "on" : "off") + '">' +
         (on ? "✓ Available" : "✕ Sold out") + '</div></article>';
     });
     html += "</div></section>";
   });
+
+  if (!shown) {
+    html = '<div class="menu-empty"><p aria-hidden="true">🔍</p><strong>No dishes found</strong>' +
+      '<span>' + (q ? "Nothing on the menu matches “" + esc(q) + "”." : "No dishes match the filters you picked.") +
+      '</span><button id="clearFiltersBtn" class="menu-empty-btn" type="button">Clear search &amp; filters</button></div>';
+  }
   menu.innerHTML = html;
+
+  const count = $("menuCount");
+  if (count) {
+    count.textContent = shown === 0 ? "" : filtersActive()
+      ? "Showing " + shown + " of " + DISHES.length + " dishes"
+      : DISHES.length + " dishes across " + groups.size + " categories";
+  }
   const updated = $("menuUpdated");
   if (updated) updated.textContent = state.updatedAt ? "Menu updated " + formatTime(state.updatedAt) : "";
+}
+
+/* Search box, chips and category jump links (customer pages only) ---------- */
+function buildCategoryChips() {
+  const row = $("categoryJump");
+  if (!row || row.childElementCount) return;
+  const seen = [];
+  DISHES.forEach(d => { if (seen.indexOf(d.category) === -1) seen.push(d.category); });
+  row.innerHTML = seen.map(c =>
+    '<button class="chip chip-cat" type="button" data-category="' + esc(c) + '"><span aria-hidden="true">' +
+    (CATEGORIES[c] || "🍽️") + "</span>" + esc(c) + "</button>").join("");
+}
+
+function scrollToCategory(category) {
+  const target = document.getElementById("cat-" + slugify(category));
+  if (!target) return;
+  const tools = document.querySelector(".menu-tools");
+  const offset = (tools ? tools.offsetHeight : 0) + 12;   // clear the sticky bar
+  const top = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset) - offset;
+  window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+}
+
+function resetFilters() {
+  menuFilter.query = ""; menuFilter.diet = "all"; menuFilter.availableOnly = false;
+  const input = $("menuSearch");
+  if (input) input.value = "";
+  syncFilterUI();
+  renderCustomer();
+}
+
+// Keeps the chips, the clear button and aria-pressed in step with menuFilter.
+function syncFilterUI() {
+  const clear = $("searchClear");
+  if (clear) clear.hidden = !menuFilter.query;
+  document.querySelectorAll("#dietFilters [data-diet]").forEach(btn => {
+    const on = btn.dataset.diet === menuFilter.diet;
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  const avail = $("availableOnly");
+  if (avail) {
+    avail.classList.toggle("is-active", menuFilter.availableOnly);
+    avail.setAttribute("aria-pressed", menuFilter.availableOnly ? "true" : "false");
+  }
+}
+
+function initCustomerTools() {
+  const menu = $("menu");
+  if (!menu) return;
+  buildCategoryChips();
+  syncFilterUI();
+
+  const input = $("menuSearch");
+  if (input) {
+    input.addEventListener("input", () => {
+      menuFilter.query = input.value;
+      syncFilterUI();
+      renderCustomer();
+    });
+    // "/" jumps to the search box, as on most menu and docs sites.
+    document.addEventListener("keydown", e => {
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      e.preventDefault();
+      input.focus();
+    });
+  }
+
+  const clearBtn = $("searchClear");
+  if (clearBtn) clearBtn.addEventListener("click", () => {
+    menuFilter.query = "";
+    if (input) { input.value = ""; input.focus(); }
+    syncFilterUI();
+    renderCustomer();
+  });
+
+  const dietRow = $("dietFilters");
+  if (dietRow) dietRow.addEventListener("click", e => {
+    const btn = e.target.closest(".chip");
+    if (!btn) return;
+    if (btn.hasAttribute("data-available-only")) menuFilter.availableOnly = !menuFilter.availableOnly;
+    else if (btn.dataset.diet) menuFilter.diet = btn.dataset.diet;
+    else return;
+    syncFilterUI();
+    renderCustomer();
+  });
+
+  const catRow = $("categoryJump");
+  if (catRow) catRow.addEventListener("click", e => {
+    const btn = e.target.closest(".chip-cat");
+    if (!btn) return;
+    const category = btn.dataset.category;
+    // If the current filters hide that category, clear them so the jump works.
+    if (!document.getElementById("cat-" + slugify(category)) && filtersActive()) resetFilters();
+    scrollToCategory(category);
+  });
+
+  menu.addEventListener("click", e => {
+    const btn = e.target.closest("#clearFiltersBtn");
+    if (btn) resetFilters();
+  });
 }
 
 const adminLogin = $("adminLogin");
@@ -742,22 +1023,111 @@ function disconnectGitHub() {
 }
 
 /* -------------------------------------------------------- Admin wiring */
+// Sign-in: compare SHA-256("user:passcode") with CONFIG.adminCredentialSha256.
+// Wrong tries are counted in localStorage and lock the form briefly, so the
+// hash cannot be brute-forced by simply reloading the page.
+async function submitLogin() {
+  const form = $("loginForm"), error = $("loginError");
+  if (!form) return false;
+  const userField = $("loginUsername"), passField = $("loginPassword");
+  const button = form.querySelector(".login-btn");
+
+  if (lockRemaining()) { showLockout(); return false; }
+
+  const username = (userField ? userField.value : "").trim().toLowerCase();
+  const passcode = passField ? passField.value : "";
+  if (button) { button.disabled = true; button.textContent = "Checking…"; }
+  if (error) error.textContent = "";
+
+  let ok = false;
+  try {
+    ok = sameDigest(await hashCredentials(username, passcode),
+                    String(CONFIG.adminCredentialSha256 || "").trim().toLowerCase());
+  } catch (err) {
+    ok = false;
+  }
+  if (passField) passField.value = "";           // never leave it in the DOM
+  if (button) { button.disabled = false; button.textContent = "Sign in"; }
+
+  if (ok) {
+    writeAttempts({ count: 0, lockedUntil: 0 });
+    stopLockoutTicker();
+    sessionStorage.setItem(ADMIN_SESSION, "true");
+    adminLogin.hidden = true; adminApp.hidden = false;
+    if (error) error.textContent = "";
+    warnIfDefaultPasscode();
+    renderAdmin();
+    afterAdminVisible();
+    return true;
+  }
+
+  const attempts = readAttempts();
+  attempts.count += 1;
+  if (attempts.count >= CONFIG.adminMaxAttempts) {
+    attempts.lockedUntil = Date.now() + CONFIG.adminLockMs;
+    attempts.count = 0;
+    writeAttempts(attempts);
+    showLockout();
+  } else {
+    writeAttempts(attempts);
+    const left = CONFIG.adminMaxAttempts - attempts.count;
+    if (error) error.textContent = "Incorrect username or passcode. " + left +
+      (left === 1 ? " attempt" : " attempts") + " left before a short lock.";
+  }
+  return false;
+}
+
+let lockoutTicker = null;
+function stopLockoutTicker() {
+  if (lockoutTicker) { clearInterval(lockoutTicker); lockoutTicker = null; }
+}
+function showLockout() {
+  const error = $("loginError");
+  const form = $("loginForm");
+  const button = form ? form.querySelector(".login-btn") : null;
+  const tick = () => {
+    const left = lockRemaining();
+    if (!left) {
+      stopLockoutTicker();
+      if (error) error.textContent = "";
+      if (button) { button.disabled = false; button.textContent = "Sign in"; }
+      return;
+    }
+    const secs = Math.ceil(left / 1000);
+    if (error) error.textContent = "Too many attempts. Try again in " + secs + "s.";
+    if (button) { button.disabled = true; button.textContent = "Locked · " + secs + "s"; }
+  };
+  tick();
+  stopLockoutTicker();
+  lockoutTicker = setInterval(tick, 500);
+}
+
+// Nudges the owner to replace admin/admin, which is still the default hash.
+function warnIfDefaultPasscode() {
+  const app = $("adminApp");
+  if (!app || $("defaultPasscodeNotice")) return;
+  if (!sameDigest(String(CONFIG.adminCredentialSha256 || "").trim().toLowerCase(), DEFAULT_CREDENTIAL_SHA256)) return;
+  const notice = document.createElement("div");
+  notice.className = "notice";
+  notice.id = "defaultPasscodeNotice";
+  notice.innerHTML = "<strong>Still using the default sign-in</strong>" +
+    "<span>admin / admin is the shipped credential, so anyone who finds this page can change your menu. " +
+    "Pick your own: in the browser console run " +
+    "<code>SpiceStreetMenu.hashCredentials(\"you\", \"your passcode\")</code> and put the hash in " +
+    "<code>window.SPICE_STREET_CONFIG.adminCredentialSha256</code> before app.js loads. " +
+    '<a href="https://github.com/' + esc(CONFIG.repo) + '#admin-sign-in" target="_blank" rel="noopener">Step-by-step</a></span>';
+  app.insertBefore(notice, app.firstChild);
+}
+
 function initAdmin() {
   const loginForm = $("loginForm");
   if (loginForm) {
-    if (sessionStorage.getItem(ADMIN_SESSION) === "true") { adminLogin.hidden = true; adminApp.hidden = false; }
-    loginForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const u = $("loginUsername").value.trim();
-      const p = $("loginPassword").value;
-      const error = $("loginError");
-      if (u === "admin" && p === "admin") {
-        sessionStorage.setItem(ADMIN_SESSION, "true");
-        adminLogin.hidden = true; adminApp.hidden = false; error.textContent = "";
-        renderAdmin();
-        afterAdminVisible();
-      } else error.textContent = "Incorrect username or password.";
-    });
+    if (sessionStorage.getItem(ADMIN_SESSION) === "true") {
+      adminLogin.hidden = true; adminApp.hidden = false;
+      warnIfDefaultPasscode();              // also on a reload within the session
+    }
+    loginForm.addEventListener("submit", e => { e.preventDefault(); submitLogin(); });
+    if (lockRemaining()) showLockout();     // a lock survives a page reload
   }
 
   const list = $("adminMenu");
@@ -833,6 +1203,7 @@ async function boot() {
   const hasMenuPage = Boolean($("menu")) || IS_ADMIN;
   if (IS_ADMIN) initAdmin();
   if (!hasMenuPage) return;
+  initCustomerTools();
   const haveLocal = hasLocalState();
   if (haveLocal) renderAll();
   await syncFromPublished();        // first-time visitors wait for the real menu
@@ -841,9 +1212,15 @@ async function boot() {
 }
 boot();
 
-// Handy for debugging from the browser console.
+// Handy for debugging from the browser console. `hashCredentials` is what you
+// run to generate the value for CONFIG.adminCredentialSha256 (see README).
 window.SpiceStreetMenu = {
   config: CONFIG, dishes: DISHES, loadState, syncFromPublished, publisher,
   setAvailability, setPrice, resetAllAvailable, connectGitHub, disconnectGitHub,
-  publishToGitHub, verifyToken, commitMessage, applyPatch, stateFromItems, itemsFromState
+  publishToGitHub, verifyToken, commitMessage, applyPatch, stateFromItems, itemsFromState,
+  // customer menu filters
+  menuFilter, renderCustomer, initCustomerTools, resetFilters, matchesFilter, escHighlight, slugify,
+  // admin passcode
+  hashCredentials, sha256Hex, sha256Pure, sameDigest, readAttempts, lockRemaining,
+  DEFAULT_CREDENTIAL_SHA256
 };

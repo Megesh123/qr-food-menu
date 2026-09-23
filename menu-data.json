@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T08:40:10.957Z",
+  "updatedAt": "2026-09-23T09:18:27.705Z",
   "items": [
     {
       "id": 1,
@@ -16,7 +16,7 @@
       "category": "Biriyani & Rice",
       "price": 180,
       "description": "Slow-cooked mutton with fragrant biriyani rice.",
-      "available": true
+      "available": false
     },
     {
       "id": 3,

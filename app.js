@@ -112,7 +112,21 @@ const DISHES = [
 ];
 const DISH_BY_ID = new Map(DISHES.map(d => [d.id, d]));
 const CUSTOM_DISHES_KEY = "spice-street-custom-dishes-v1";
+const DELETED_DISHES_KEY = "spice-street-deleted-dishes-v1";
 const ANALYTICS_CONFIG_PATH = "analytics-config.json";
+function getDeletedDishIds() {
+  const list = readJSON(localStorage, DELETED_DISHES_KEY, []) || [];
+  return new Set(list.map(Number).filter(Number.isFinite));
+}
+function saveDeletedDishIds(set) {
+  writeJSON(localStorage, DELETED_DISHES_KEY, Array.from(set).map(Number));
+}
+function isDishDeleted(id) { return getDeletedDishIds().has(Number(id)); }
+function setDishDeleted(id, deleted) {
+  const set = getDeletedDishIds();
+  if (deleted) set.add(Number(id)); else set.delete(Number(id));
+  saveDeletedDishIds(set);
+}
 let analyticsConfig = { provider: "goatcounter", code: "" };
 function persistCustomDish(dish) {
   const list = readJSON(localStorage, CUSTOM_DISHES_KEY, []) || [];
@@ -239,9 +253,22 @@ function normalizeState(raw) {
   return state;
 }
 function stateFromItems(items, updatedAt) {
-  (items || []).forEach(item => { ensureDish(item); });
+  const incoming = Array.isArray(items) ? items : [];
+  incoming.forEach(item => { ensureDish(item); });
+  const incomingIds = new Set(incoming.map(item => Number(item && item.id)).filter(Number.isFinite));
+  const knownBefore = DISHES.map(d => Number(d.id));
+  // Published menu is the source of truth for which dishes are active.
+  // This lets a deleted dish stay deleted on every device.
+  if (incoming.length) {
+    const deleted = getDeletedDishIds();
+    knownBefore.forEach(id => {
+      if (!incomingIds.has(id)) deleted.add(id);
+      else deleted.delete(id);
+    });
+    saveDeletedDishIds(deleted);
+  }
   const state = defaultState();
-  (items || []).forEach(item => {
+  incoming.forEach(item => {
     const id = Number(item && item.id);
     if (!DISH_BY_ID.has(id)) return;
     if (typeof item.available === "boolean") state.availability[id] = item.available;
@@ -252,7 +279,8 @@ function stateFromItems(items, updatedAt) {
   return state;
 }
 function itemsFromState(state) {
-  return DISHES.map(d => ({
+  const deleted = getDeletedDishIds();
+  return DISHES.filter(d => !deleted.has(Number(d.id))).map(d => ({
     id: d.id, name: d.name, category: d.category,
     price: state.prices[d.id], description: d.description,
     veg: d.veg !== false, available: state.availability[d.id]
@@ -431,8 +459,9 @@ function renderCustomer() {
   const q = menuFilter.query.trim();
   const groups = new Map();
   let shown = 0;
+  const deleted = getDeletedDishIds();
   DISHES.forEach(d => {
-    if (!matchesFilter(d, state)) return;
+    if (deleted.has(Number(d.id)) || !matchesFilter(d, state)) return;
     if (!groups.has(d.category)) groups.set(d.category, []);
     groups.get(d.category).push(d);
     shown++;
@@ -463,8 +492,8 @@ function renderCustomer() {
   const count = $("menuCount");
   if (count) {
     count.textContent = shown === 0 ? "" : filtersActive()
-      ? "Showing " + shown + " of " + DISHES.length + " dishes"
-      : DISHES.length + " dishes across " + groups.size + " categories";
+      ? "Showing " + shown + " of " + (DISHES.length - getDeletedDishIds().size) + " dishes"
+      : (DISHES.length - getDeletedDishIds().size) + " dishes across " + groups.size + " categories";
   }
   const updated = $("menuUpdated");
   if (updated) updated.textContent = state.updatedAt ? "Menu updated " + formatTime(state.updatedAt) : "";
@@ -588,12 +617,14 @@ let adminMenuFilter = "all";
 let adminCategoryFilter = "all";
 
 function matchesAdminFilter(d, state) {
+  const deleted = isDishDeleted(d.id);
   switch (adminMenuFilter) {
-    case "available": return state.availability[d.id] === true;
-    case "soldout": return state.availability[d.id] === false;
-    case "veg": return d.veg !== false;
-    case "nonveg": return d.veg === false;
-    default: return true;
+    case "available": return !deleted && state.availability[d.id] === true;
+    case "soldout": return !deleted && state.availability[d.id] === false;
+    case "veg": return !deleted && d.veg !== false;
+    case "nonveg": return !deleted && d.veg === false;
+    case "deleted": return deleted;
+    default: return !deleted;
   }
 }
 
@@ -609,13 +640,17 @@ function buildAdminList(state) {
       html += '<div class="admin-category">' + icon + " " + esc(d.category) + "</div>";
       lastCategory = d.category;
     }
-    html += '<div class="admin-row" data-row="' + d.id + '"><div class="admin-info"><div class="admin-food-icon">' + icon +
+    const deleted = isDishDeleted(d.id);
+    html += '<div class="admin-row' + (deleted ? ' deleted-row' : '') + '" data-row="' + d.id + '"><div class="admin-info"><div class="admin-food-icon">' + icon +
       '</div><div><strong>' + esc(d.name) + '</strong>' +
       '<form class="price-editor" data-price-form="' + d.id + '" autocomplete="off"><span>₹</span>' +
       '<input class="price-input" type="number" inputmode="numeric" min="0" step="1" value="' + state.prices[d.id] +
-      '" data-price-id="' + d.id + '" data-saved="' + state.prices[d.id] + '" aria-label="Price for ' + esc(d.name) + '">' +
-      '<button class="price-save" type="submit">Save</button></form></div></div>' +
-      '<button class="toggle" type="button" data-id="' + d.id + '"></button></div>';
+      '" data-price-id="' + d.id + '" data-saved="' + state.prices[d.id] + '" aria-label="Price for ' + esc(d.name) + '"' + (deleted ? ' disabled' : '') + '>' +
+      '<button class="price-save" type="submit"' + (deleted ? ' disabled' : '') + '>Save</button></form></div></div>' +
+      (deleted
+        ? '<div class="admin-row-actions"><span class="deleted-label">DELETED</span><button class="restore-dish" type="button" data-restore-id="' + d.id + '">Restore</button></div>'
+        : '<div class="admin-row-actions"><button class="delete-dish" type="button" data-delete-id="' + d.id + '">Delete</button><button class="toggle" type="button" data-id="' + d.id + '"></button></div>') +
+      '</div>';
   });
   if (!filtered.length) html = '<div class="empty-state"><strong>No dishes found.</strong><span>Try a different filter.</span></div>';
   return html;
@@ -625,10 +660,18 @@ function renderAdmin() {
   const list = $("adminMenu");
   if (!list || !adminVisible()) return;
   const state = loadState();
-  const available = DISHES.filter(d => state.availability[d.id]).length;
+  const deleted = getDeletedDishIds();
+  const activeDishes = DISHES.filter(d => !deleted.has(Number(d.id)));
+  const available = activeDishes.filter(d => state.availability[d.id]).length;
   $("availableCount").textContent = available;
-  $("soldOutCount").textContent = DISHES.length - available;
+  $("soldOutCount").textContent = activeDishes.length - available;
   list.innerHTML = buildAdminList(state);
+  list.querySelectorAll(".toggle").forEach(btn => {
+    const id = Number(btn.dataset.id), on = state.availability[id];
+    btn.className = "toggle " + (on ? "on" : "off");
+    btn.textContent = on ? "AVAILABLE" : "SOLD OUT";
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
   renderSyncStatus();
 }
 function renderAll() { renderCustomer(); renderAdmin(); }
@@ -1268,6 +1311,30 @@ function initAdmin() {
   const list = $("adminMenu");
   if (list) {
     list.addEventListener("click", e => {
+      const deleteBtn = e.target.closest(".delete-dish");
+      if (deleteBtn) {
+        const id = Number(deleteBtn.dataset.deleteId);
+        const dish = DISH_BY_ID.get(id);
+        if (dish && confirm('Delete "' + dish.name + '" from the menu? It will be removed from the customer menu after publishing.')) {
+          setDishDeleted(id, true);
+          publisher.addPending({ [id]: { deleted: true } });
+          renderAll();
+          publisher.schedule();
+        }
+        return;
+      }
+      const restoreBtn = e.target.closest(".restore-dish");
+      if (restoreBtn) {
+        const id = Number(restoreBtn.dataset.restoreId);
+        const dish = DISH_BY_ID.get(id);
+        if (dish && confirm('Restore "' + dish.name + '" to the menu?')) {
+          setDishDeleted(id, false);
+          publisher.addPending({ [id]: { deleted: false } });
+          renderAll();
+          publisher.schedule();
+        }
+        return;
+      }
       const btn = e.target.closest(".toggle");
       if (!btn) return;
       const id = Number(btn.dataset.id);

@@ -1,41 +1,52 @@
-const THEME_KEY="spice-street-theme-v1";
-function applyTheme(){
-  const saved=localStorage.getItem(THEME_KEY);
-  const theme=saved==="light"?"light":"dark";
-  document.body.classList.toggle("light",theme==="light");
-  const btn=document.getElementById("themeToggle");
-  if(btn){btn.textContent=theme==="dark"?"☀️ Light":"🌙 Dark";btn.setAttribute("aria-label",theme==="dark"?"Switch to light theme":"Switch to dark theme");}
+/* =========================================================================
+   Spice Street – QR menu
+   -------------------------------------------------------------------------
+   One script shared by the landing page, the customer menu and the admin
+   dashboard.
+
+   How live updates work
+   ---------------------
+   • menu-data.json (in this repository) is the single source of truth for
+     prices and availability. GitHub Pages serves it next to this file.
+   • Every page downloads menu-data.json, caches it in localStorage and
+     re-checks it periodically, so customers always see the latest menu.
+   • When the admin changes a price or toggles Available / Sold out, the
+     change is saved on the device immediately and then committed to
+     menu-data.json on GitHub through the GitHub REST API (a fine-grained
+     token that the admin pastes once in "GitHub settings"). Changes made
+     within a couple of seconds are batched into a single commit. GitHub
+     Pages redeploys automatically, and the customer menu updates.
+   ========================================================================= */
+
+/* ------------------------------------------------------------------ Theme */
+const THEME_KEY = "spice-street-theme-v1";
+function applyTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const theme = saved === "light" ? "light" : "dark";
+  document.body.classList.toggle("light", theme === "light");
+  const btn = document.getElementById("themeToggle");
+  if (btn) {
+    btn.textContent = theme === "dark" ? "☀️ Light" : "🌙 Dark";
+    btn.setAttribute("aria-label", theme === "dark" ? "Switch to light theme" : "Switch to dark theme");
+  }
 }
-function toggleTheme(){const next=document.body.classList.contains("light")?"dark":"light";localStorage.setItem(THEME_KEY,next);applyTheme();}
-const themeToggle=document.getElementById("themeToggle");
-if(themeToggle)themeToggle.addEventListener("click",toggleTheme);
+function toggleTheme() {
+  const next = document.body.classList.contains("light") ? "dark" : "light";
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme();
+}
+const themeToggle = document.getElementById("themeToggle");
+if (themeToggle) themeToggle.addEventListener("click", toggleTheme);
 applyTheme();
 window.addEventListener("pageshow", applyTheme);
-window.addEventListener("storage", (event)=>{ if(event.key===THEME_KEY) applyTheme(); });
 
-const ADMIN_SESSION="spice-street-admin-session";
-const adminLogin=document.getElementById("adminLogin");
-const adminApp=document.getElementById("adminApp");
-if(document.getElementById("loginForm")){
-  if(sessionStorage.getItem(ADMIN_SESSION)==="true"){adminLogin.hidden=true;adminApp.hidden=false;}
-  document.getElementById("loginForm").addEventListener("submit",e=>{
-    e.preventDefault();
-    const u=document.getElementById("loginUsername").value.trim();
-    const p=document.getElementById("loginPassword").value;
-    const error=document.getElementById("loginError");
-    if(u==="admin"&&p==="admin"){
-      sessionStorage.setItem(ADMIN_SESSION,"true");
-      adminLogin.hidden=true;adminApp.hidden=false;error.textContent="";renderAdmin();
-    }else error.textContent="Incorrect username or password.";
-  });
-}
-
-const CATEGORIES={
-  "Biriyani & Rice":"🍚","Starters":"🍗","South Indian":"🥘","Breads":"🫓",
-  "Curries":"🍛","Pizza":"🍕","Burgers & Sandwiches":"🍔","Chinese":"🥡",
-  "Pasta":"🍝","Desserts":"🍰","Ice Cream":"🍨","Drinks":"🥤"
+/* ---------------------------------------------------------------- Catalog */
+const CATEGORIES = {
+  "Biriyani & Rice": "🍚", "Starters": "🍗", "South Indian": "🥘", "Breads": "🫓",
+  "Curries": "🍛", "Pizza": "🍕", "Burgers & Sandwiches": "🍔", "Chinese": "🥡",
+  "Pasta": "🍝", "Desserts": "🍰", "Ice Cream": "🍨", "Drinks": "🥤"
 };
-const DISHES=[
+const DISHES = [
 {id:1,name:"Chicken Biriyani",category:"Biriyani & Rice",price:120,description:"Basmati rice, chicken and aromatic spices."},
 {id:2,name:"Mutton Biriyani",category:"Biriyani & Rice",price:180,description:"Slow-cooked mutton with fragrant biriyani rice."},
 {id:3,name:"Egg Biriyani",category:"Biriyani & Rice",price:110,description:"Fragrant biriyani rice with seasoned boiled egg."},
@@ -99,54 +110,740 @@ const DISHES=[
 {id:61,name:"Cold Coffee",category:"Drinks",price:90,description:"Chilled creamy coffee drink."},
 {id:62,name:"Masala Tea",category:"Drinks",price:30,description:"Hot Indian tea brewed with aromatic spices."}
 ];
-const GITHUB_REPO="Megesh123/qr-food-menu";
-const GITHUB_BRANCH="main";
-const GITHUB_DATA_PATH="menu-data.json";
-const GITHUB_TOKEN_KEY="spice-street-github-token-v1";
-async function getPublishedMenu(){
-  try{const r=await fetch("/menu-data.json?v="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("Menu data unavailable");return await r.json()}catch(e){return null}
+const DISH_BY_ID = new Map(DISHES.map(d => [d.id, d]));
+
+/* ---------------------------------------------------------- Configuration */
+// A page may override these before app.js loads: window.SPICE_STREET_CONFIG = {...}
+const CONFIG = Object.assign({
+  repo: "Megesh123/qr-food-menu",   // GitHub repository that hosts this site
+  branch: "main",                   // branch GitHub Pages deploys from
+  dataPath: "menu-data.json",       // published menu file inside the repo
+  apiBase: "https://api.github.com",
+  publishDebounceMs: 2500,          // wait for more clicks before committing
+  publishMaxWaitMs: 8000,           // ...but never wait longer than this
+  customerPollMs: 60 * 1000,        // how often the customer menu re-checks
+  adminPollMs: 30 * 1000,
+  liveCheckPollMs: 8 * 1000,        // faster polling right after a publish
+  liveCheckMaxMs: 6 * 60 * 1000
+}, window.SPICE_STREET_CONFIG || {});
+
+// menu-data.json lives next to app.js, wherever the site is hosted.
+const PUBLISHED_MENU_URL = (() => {
+  try { return new URL(CONFIG.dataPath, document.currentScript.src).href; }
+  catch (e) { return "/" + CONFIG.dataPath; }
+})();
+
+const MENU_STATE_KEY = "spice-street-menu-state-v3";      // cached menu (all pages)
+const PENDING_KEY = "spice-street-pending-changes-v1";    // admin changes not yet on GitHub
+const GITHUB_TOKEN_KEY = "spice-street-github-token-v2";
+const GITHUB_USER_KEY = "spice-street-github-user-v1";
+const ADMIN_SESSION = "spice-street-admin-session";
+
+// Keys used by earlier versions of this app. The published file is now the
+// source of truth, so stale copies are simply dropped.
+["spice-street-availability-v2", "spice-street-prices-v1", "spice-street-github-token-v1"]
+  .forEach(k => { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) {} });
+
+/* ---------------------------------------------------------- Small helpers */
+const $ = id => document.getElementById(id);
+function readJSON(storage, key, fallback) {
+  try { const raw = storage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (e) { return fallback; }
 }
-let publishQueue=Promise.resolve();
-async function publishMenuToGitHub(){
-  const token=sessionStorage.getItem(GITHUB_TOKEN_KEY)||prompt("Enter your GitHub fine-grained token once. It is kept only in this browser session and is used to publish menu changes.");
-  if(!token)return false;
-  sessionStorage.setItem(GITHUB_TOKEN_KEY,token);
-  const state=getAvailability(),prices=getPrices();
-  const payload={version:1,updatedAt:new Date().toISOString(),items:DISHES.map(d=>({...d,price:Number(prices[d.id]??d.price),available:Boolean(state[d.id])}))};
-  const headers={Authorization:"Bearer "+token,Accept:"application/vnd.github+json","Content-Type":"application/json"};
-  try{
-    const existing=await fetch("https://api.github.com/repos/"+GITHUB_REPO+"/contents/"+GITHUB_DATA_PATH+"?ref="+GITHUB_BRANCH,{headers});
-    let sha="";
-    if(existing.ok){const data=await existing.json();sha=data.sha}
-    const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(payload,null,2)+"\\n")));
-    const body={message:"Update live menu data",content:encoded,branch:GITHUB_BRANCH,...(sha?{sha}:{})};
-    const r=await fetch("https://api.github.com/repos/"+GITHUB_REPO+"/contents/"+GITHUB_DATA_PATH,{method:"PUT",headers,body:JSON.stringify(body)});
-    if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.message||"GitHub update failed")}
-    return true;
-  }catch(e){alert("Could not update GitHub automatically: "+e.message);return false}
+function writeJSON(storage, key, value) {
+  try { storage.setItem(key, JSON.stringify(value)); } catch (e) {}
 }
-function autoPublish(){
-  publishQueue=publishQueue.then(()=>publishMenuToGitHub()).catch(()=>false);
-  return publishQueue;
+function parseTime(iso) { const t = Date.parse(iso || ""); return Number.isFinite(t) ? t : 0; }
+function formatTime(iso) {
+  const t = parseTime(iso);
+  if (!t) return "";
+  return new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function base64ToUtf8(b64) {
+  const bin = atob(String(b64).replace(/\s/g, ""));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
-const STORAGE_KEY="spice-street-availability-v2";const PRICE_KEY="spice-street-prices-v1";function getPrices(){const s=localStorage.getItem(PRICE_KEY);if(s)return JSON.parse(s);const p={};DISHES.forEach(d=>p[d.id]=d.price);return p}function savePrices(p){localStorage.setItem(PRICE_KEY,JSON.stringify(p));}
-function getAvailability(){const saved=localStorage.getItem(STORAGE_KEY);if(saved)return JSON.parse(saved);const initial={};DISHES.forEach(d=>initial[d.id]=true);initial[2]=false;initial[58]=false;return initial}
-function saveAvailability(state){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
-function renderCustomer(){const menu=document.getElementById("menu");if(!menu)return;const state=getAvailability();const prices=getPrices();const groups={};DISHES.forEach(d=>{if(!groups[d.category])groups[d.category]=[];groups[d.category].push(d)});let html="";Object.entries(groups).forEach(([category,dishes])=>{html+='<section class="category-section"><div class="category-heading"><div class="category-icon">'+(CATEGORIES[category]||"🍽️")+'</div><div><h2>'+category+'</h2><p>'+dishes.length+' items</p></div></div><div class="menu-grid">';dishes.forEach(d=>{const a=state[d.id];html+='<article class="menu-card '+(a?"":"sold")+'"><div><div class="category">'+category+'</div><div class="dish-name">'+d.name+'</div><div class="description">'+d.description+'</div><div class="price">₹'+(prices[d.id]??d.price)+'</div></div><div class="badge '+(a?"on":"off")+'">'+(a?"✓ Available":"✕ Sold out")+'</div></article>'});html+="</div></section>"});menu.innerHTML=html}
-function renderAdmin(){const list=document.getElementById("adminMenu");if(!list||!adminApp||adminApp.hidden)return;const state=getAvailability();const prices=getPrices();const available=DISHES.filter(d=>state[d.id]).length;document.getElementById("availableCount").textContent=available;document.getElementById("soldOutCount").textContent=DISHES.length-available;let html="",lastCategory="";DISHES.forEach(d=>{const on=state[d.id];if(lastCategory!==d.category){html+='<div class="admin-category">'+(CATEGORIES[d.category]||"🍽️")+" "+d.category+"</div>";lastCategory=d.category}html+='<div class="admin-row"><div class="admin-info"><div class="admin-food-icon">'+(CATEGORIES[d.category]||"🍽️")+'</div><div><strong>'+d.name+'</strong><div class="price-editor"><span>₹</span><input class="price-input" type="number" min="0" step="1" value="'+(prices[d.id]??d.price)+'" data-price-id="'+d.id+'"><button class="price-save" data-save-price="'+d.id+'">Save</button></div></div></div><button class="toggle '+(on?"on":"off")+'" data-id="'+d.id+'">'+(on?"AVAILABLE":"SOLD OUT")+"</button></div>"});list.innerHTML=html;list.querySelectorAll(".toggle").forEach(b=>b.addEventListener("click",()=>{const s=getAvailability();const id=Number(b.dataset.id);s[id]=!s[id];saveAvailability(s);renderAdmin();autoPublish()}));list.querySelectorAll(".price-save").forEach(b=>b.addEventListener("click",()=>{const id=Number(b.dataset.savePrice);const input=list.querySelector('[data-price-id="'+id+'"]');const value=Math.max(0,Math.round(Number(input.value)));if(!Number.isFinite(value))return;const p=getPrices();p[id]=value;savePrices(p);renderAdmin();autoPublish()}))}
-const resetBtn=document.getElementById("resetBtn");
-if(resetBtn)resetBtn.addEventListener("click",()=>{if(confirm("Reset all dishes to available?")){const s={};DISHES.forEach(d=>s[d.id]=true);saveAvailability(s);renderAdmin();autoPublish()}});
-window.addEventListener("storage",()=>{renderCustomer();renderAdmin()});
-renderCustomer();renderAdmin();
-async function syncPublishedMenu(){
-  const data=await getPublishedMenu();
-  if(!data||!Array.isArray(data.items))return;
-  const availability={},prices={};
-  data.items.forEach(item=>{availability[item.id]=Boolean(item.available);prices[item.id]=Number(item.price);});
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(availability));
-  localStorage.setItem(PRICE_KEY,JSON.stringify(prices));
-  renderCustomer();
-  renderAdmin();
+/* --------------------------------------------------------- Menu state */
+// state = { updatedAt: ISO string, availability: {id: bool}, prices: {id: number} }
+function defaultState() {
+  const availability = {}, prices = {};
+  DISHES.forEach(d => { availability[d.id] = true; prices[d.id] = d.price; });
+  return { updatedAt: "", availability, prices };
 }
-syncPublishedMenu();
+function normalizeState(raw) {
+  const state = defaultState();
+  if (!raw || typeof raw !== "object") return state;
+  DISHES.forEach(d => {
+    if (raw.availability && typeof raw.availability[d.id] === "boolean") state.availability[d.id] = raw.availability[d.id];
+    const p = raw.prices ? Number(raw.prices[d.id]) : NaN;
+    if (Number.isFinite(p) && p >= 0) state.prices[d.id] = p;
+  });
+  state.updatedAt = typeof raw.updatedAt === "string" ? raw.updatedAt : "";
+  return state;
+}
+function stateFromItems(items, updatedAt) {
+  const state = defaultState();
+  (items || []).forEach(item => {
+    const id = Number(item && item.id);
+    if (!DISH_BY_ID.has(id)) return;
+    if (typeof item.available === "boolean") state.availability[id] = item.available;
+    const p = Number(item.price);
+    if (Number.isFinite(p) && p >= 0) state.prices[id] = p;
+  });
+  state.updatedAt = typeof updatedAt === "string" ? updatedAt : "";
+  return state;
+}
+function itemsFromState(state) {
+  return DISHES.map(d => ({
+    id: d.id, name: d.name, category: d.category,
+    price: state.prices[d.id], description: d.description,
+    available: state.availability[d.id]
+  }));
+}
+// patch = { [id]: { available?: bool, price?: number } }
+function applyPatch(state, patch) {
+  const next = normalizeState(state);
+  Object.keys(patch || {}).forEach(key => {
+    const id = Number(key), change = patch[key];
+    if (!DISH_BY_ID.has(id) || !change) return;
+    if (typeof change.available === "boolean") next.availability[id] = change.available;
+    if (Number.isFinite(change.price) && change.price >= 0) next.prices[id] = change.price;
+  });
+  return next;
+}
+function mergePatches(older, newer) {
+  const out = {};
+  [older, newer].forEach(p => Object.keys(p || {}).forEach(id => { out[id] = Object.assign({}, out[id] || {}, p[id]); }));
+  return out;
+}
+function hasLocalState() { try { return localStorage.getItem(MENU_STATE_KEY) !== null; } catch (e) { return false; } }
+function loadState() { return normalizeState(readJSON(localStorage, MENU_STATE_KEY, null)); }
+function saveState(state) { writeJSON(localStorage, MENU_STATE_KEY, state); }
+
+/* ------------------------------------------------------------- Rendering */
+function renderCustomer() {
+  const menu = $("menu");
+  if (!menu) return;
+  const state = loadState();
+  const groups = {};
+  DISHES.forEach(d => { (groups[d.category] = groups[d.category] || []).push(d); });
+  let html = "";
+  Object.entries(groups).forEach(([category, dishes]) => {
+    html += '<section class="category-section"><div class="category-heading"><div class="category-icon">' + (CATEGORIES[category] || "🍽️") +
+      '</div><div><h2>' + esc(category) + '</h2><p>' + dishes.length + ' items</p></div></div><div class="menu-grid">';
+    dishes.forEach(d => {
+      const on = state.availability[d.id];
+      html += '<article class="menu-card ' + (on ? "" : "sold") + '"><div><div class="category">' + esc(category) +
+        '</div><div class="dish-name">' + esc(d.name) + '</div><div class="description">' + esc(d.description) +
+        '</div><div class="price">₹' + state.prices[d.id] + '</div></div><div class="badge ' + (on ? "on" : "off") + '">' +
+        (on ? "✓ Available" : "✕ Sold out") + '</div></article>';
+    });
+    html += "</div></section>";
+  });
+  menu.innerHTML = html;
+  const updated = $("menuUpdated");
+  if (updated) updated.textContent = state.updatedAt ? "Menu updated " + formatTime(state.updatedAt) : "";
+}
+
+const adminLogin = $("adminLogin");
+const adminApp = $("adminApp");
+const IS_ADMIN = Boolean(adminApp);
+function adminVisible() { return IS_ADMIN && !adminApp.hidden; }
+
+function buildAdminList(state) {
+  let html = "", lastCategory = "";
+  DISHES.forEach(d => {
+    const icon = CATEGORIES[d.category] || "🍽️";
+    if (lastCategory !== d.category) {
+      html += '<div class="admin-category">' + icon + " " + esc(d.category) + "</div>";
+      lastCategory = d.category;
+    }
+    html += '<div class="admin-row" data-row="' + d.id + '"><div class="admin-info"><div class="admin-food-icon">' + icon +
+      '</div><div><strong>' + esc(d.name) + '</strong>' +
+      '<form class="price-editor" data-price-form="' + d.id + '" autocomplete="off"><span>₹</span>' +
+      '<input class="price-input" type="number" inputmode="numeric" min="0" step="1" value="' + state.prices[d.id] +
+      '" data-price-id="' + d.id + '" data-saved="' + state.prices[d.id] + '" aria-label="Price for ' + esc(d.name) + '">' +
+      '<button class="price-save" type="submit">Save</button></form></div></div>' +
+      '<button class="toggle" type="button" data-id="' + d.id + '"></button></div>';
+  });
+  return html;
+}
+// Builds the list once, then updates rows in place so that a price the admin
+// is still typing is never wiped by a re-render or a background sync.
+function renderAdmin() {
+  const list = $("adminMenu");
+  if (!list || !adminVisible()) return;
+  const state = loadState();
+  const available = DISHES.filter(d => state.availability[d.id]).length;
+  $("availableCount").textContent = available;
+  $("soldOutCount").textContent = DISHES.length - available;
+  if (!list.querySelector(".admin-row")) list.innerHTML = buildAdminList(state);
+  DISHES.forEach(d => {
+    const row = list.querySelector('[data-row="' + d.id + '"]');
+    if (!row) return;
+    const on = state.availability[d.id];
+    const btn = row.querySelector(".toggle");
+    btn.className = "toggle " + (on ? "on" : "off");
+    btn.textContent = on ? "AVAILABLE" : "SOLD OUT";
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    const input = row.querySelector(".price-input");
+    const saved = String(state.prices[d.id]);
+    if (input.dataset.saved !== saved) {
+      if (input.value === input.dataset.saved) input.value = saved; // untouched → show the new saved price
+      input.dataset.saved = saved;
+    }
+  });
+  renderSyncStatus();
+}
+function renderAll() { renderCustomer(); renderAdmin(); }
+
+/* ------------------------------------------------------- Published menu */
+let lastRemoteUpdatedAt = "";
+let lastFetchAt = 0;
+let syncInFlight = null;
+
+async function fetchPublishedMenu() {
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), 8000) : null;
+  try {
+    const url = PUBLISHED_MENU_URL + (PUBLISHED_MENU_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
+    const res = await fetch(url, { cache: "no-store", signal: controller ? controller.signal : undefined });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if (!data || !Array.isArray(data.items)) throw new Error("Invalid menu data");
+    return data;
+  } catch (e) {
+    return null;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+// Pulls menu-data.json and applies it when it is newer than what we have.
+// Never overwrites admin changes that are still waiting to be published.
+function syncFromPublished({ force = false } = {}) {
+  if (syncInFlight) return syncInFlight;
+  syncInFlight = (async () => {
+    lastFetchAt = Date.now();
+    const remote = await fetchPublishedMenu();
+    if (!remote) return null;
+    lastRemoteUpdatedAt = remote.updatedAt || "";
+    const local = loadState();
+    const remoteTime = parseTime(remote.updatedAt);
+    const dirty = IS_ADMIN && publisher.isDirty();
+    if (!dirty && (force || !local.updatedAt || remoteTime > parseTime(local.updatedAt))) {
+      saveState(stateFromItems(remote.items, remote.updatedAt));
+      renderAll();
+    }
+    if (IS_ADMIN) publisher.onRemoteSeen(remoteTime);
+    return remote;
+  })().finally(() => { syncInFlight = null; });
+  return syncInFlight;
+}
+
+function pollInterval() {
+  if (IS_ADMIN && publisher.status === "published" && Date.now() - publisher.publishedAt < CONFIG.liveCheckMaxMs) return CONFIG.liveCheckPollMs;
+  return IS_ADMIN ? CONFIG.adminPollMs : CONFIG.customerPollMs;
+}
+function startPolling() {
+  setInterval(() => {
+    if (document.hidden) return;
+    if (Date.now() - lastFetchAt >= pollInterval()) syncFromPublished();
+  }, 2000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && Date.now() - lastFetchAt > 10 * 1000) syncFromPublished();
+  });
+  window.addEventListener("online", () => { syncFromPublished(); if (IS_ADMIN) publisher.schedule(); });
+  window.addEventListener("offline", () => { if (IS_ADMIN) renderSyncStatus(); });
+}
+
+/* ------------------------------------------------------- GitHub client */
+class PublishError extends Error {
+  constructor(message, { status = 0, retryable = false, auth = false } = {}) {
+    super(message);
+    this.status = status; this.retryable = retryable; this.auth = auth;
+  }
+}
+function getToken() { try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ""; } catch (e) { return ""; } }
+function setToken(token, login) {
+  try {
+    if (token) { localStorage.setItem(GITHUB_TOKEN_KEY, token); if (login) localStorage.setItem(GITHUB_USER_KEY, login); }
+    else { localStorage.removeItem(GITHUB_TOKEN_KEY); localStorage.removeItem(GITHUB_USER_KEY); }
+  } catch (e) {}
+}
+function getGitHubUser() { try { return localStorage.getItem(GITHUB_USER_KEY) || ""; } catch (e) { return ""; } }
+function authHeaders(token) {
+  return { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+}
+function contentsUrl() { return CONFIG.apiBase + "/repos/" + CONFIG.repo + "/contents/" + CONFIG.dataPath; }
+
+async function githubError(res) {
+  let message = "";
+  try { const body = await res.json(); message = body && body.message ? body.message : ""; } catch (e) {}
+  const status = res.status;
+  if (status === 401) return new PublishError("GitHub rejected the token (expired or revoked). Connect GitHub again.", { status, auth: true });
+  if (status === 403 && /rate limit/i.test(message)) return new PublishError("GitHub API rate limit reached. Try again in a few minutes.", { status, retryable: true });
+  if (status === 403) return new PublishError("The token is not allowed to write to " + CONFIG.repo + ". Edit the token: Repository permissions → Contents → Read and write.", { status, auth: true });
+  if (status === 404) return new PublishError("The token has no access to " + CONFIG.repo + ". Edit the token: Repository access → Only select repositories → " + CONFIG.repo.split("/")[1] + ".", { status, auth: true });
+  if (status === 409) return new PublishError("GitHub reported a conflicting update. Retrying…", { status, retryable: true });
+  if (status >= 500) return new PublishError("GitHub is having trouble (HTTP " + status + "). Will retry.", { status, retryable: true });
+  return new PublishError(message || ("GitHub error (HTTP " + status + ")"), { status });
+}
+async function ghFetch(url, token, options = {}) {
+  let res;
+  try {
+    res = await fetch(url, Object.assign({ cache: "no-store" }, options, { headers: Object.assign(authHeaders(token), options.headers || {}) }));
+  } catch (e) {
+    throw new PublishError("Could not reach GitHub. Check the internet connection.", { retryable: true });
+  }
+  if (!res.ok) throw await githubError(res);
+  return res;
+}
+// Checks that the token is valid and can see the repository. Write access is
+// confirmed by the first publish (a clear error is shown if it is missing).
+async function verifyToken(token) {
+  let login = "";
+  try {
+    const user = await (await ghFetch(CONFIG.apiBase + "/user", token)).json();
+    login = user.login || "";
+  } catch (err) {
+    if (err.status === 401 || err.retryable) throw err; // invalid token / no network
+    // other token types (e.g. GitHub App tokens) cannot call /user – fine.
+  }
+  // A fine-grained token without access to the repository gets a 404 here.
+  await ghFetch(CONFIG.apiBase + "/repos/" + CONFIG.repo, token);
+  return login;
+}
+async function fetchRepoMenuFile(token) {
+  const res = await ghFetch(contentsUrl() + "?ref=" + encodeURIComponent(CONFIG.branch), token).catch(err => {
+    if (err.status === 404) return null; // first publish: file does not exist yet
+    throw err;
+  });
+  if (!res) return { sha: "", data: null };
+  const file = await res.json();
+  let data = null;
+  try { data = JSON.parse(base64ToUtf8(file.content)); } catch (e) { data = null; }
+  return { sha: file.sha || "", data: data && Array.isArray(data.items) ? data : null };
+}
+function describeChange(id, change) {
+  const dish = DISH_BY_ID.get(Number(id));
+  const parts = [];
+  if (typeof change.available === "boolean") parts.push(change.available ? "available" : "sold out");
+  if (Number.isFinite(change.price)) parts.push("price ₹" + change.price);
+  return (dish ? dish.name : "Item " + id) + " → " + parts.join(", ");
+}
+function commitMessage(batch) {
+  const ids = Object.keys(batch);
+  if (ids.length === 0) return "menu: update menu data";
+  if (ids.length <= 3) return "menu: " + ids.map(id => describeChange(id, batch[id])).join("; ");
+  const availability = ids.filter(id => typeof batch[id].available === "boolean").length;
+  const prices = ids.filter(id => Number.isFinite(batch[id].price)).length;
+  const details = [];
+  if (availability) details.push(availability + " availability");
+  if (prices) details.push(prices + " price" + (prices === 1 ? "" : "s"));
+  return "menu: update " + ids.length + " items (" + details.join(", ") + ")";
+}
+
+// Commits `batch` on top of whatever is currently on GitHub (so two phones
+// editing at the same time do not overwrite each other) and returns the
+// state that is now published.
+async function publishToGitHub(token, batch, { onAttempt } = {}) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (onAttempt) onAttempt(attempt);
+    const remote = await fetchRepoMenuFile(token);
+    const base = remote.data ? stateFromItems(remote.data.items, remote.data.updatedAt) : loadState();
+    const next = applyPatch(base, batch);
+    const remoteTime = remote.data ? parseTime(remote.data.updatedAt) : 0;
+    next.updatedAt = new Date(Math.max(Date.now(), remoteTime + 1000)).toISOString();
+    const payload = { version: 1, updatedAt: next.updatedAt, items: itemsFromState(next) };
+    const body = { message: commitMessage(batch), content: utf8ToBase64(JSON.stringify(payload, null, 2) + "\n"), branch: CONFIG.branch };
+    if (remote.sha) body.sha = remote.sha;
+    try {
+      const res = await ghFetch(contentsUrl(), token, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const result = await res.json().catch(() => ({}));
+      return { state: next, commitSha: result && result.commit ? result.commit.sha : "", commitUrl: result && result.commit ? result.commit.html_url : "" };
+    } catch (err) {
+      lastError = err;
+      if (err.status === 409 || err.status === 422) continue; // someone else committed in between → re-read and retry
+      throw err;
+    }
+  }
+  throw lastError || new PublishError("Could not publish after several attempts.", { retryable: true });
+}
+
+/* ------------------------------------------------------------ Publisher */
+// Batches admin changes and commits them to GitHub automatically.
+const publisher = {
+  pending: readJSON(localStorage, PENDING_KEY, {}) || {},
+  status: "idle",       // idle | disconnected | offline | pending | publishing | published | live | error
+  detail: "",
+  inFlight: false,
+  rerun: false,
+  timer: null,
+  maxTimer: null,
+  retryTimer: null,
+  retryCount: 0,
+  publishedAt: 0,       // Date.now() of the last successful commit
+  lastPublishedUpdatedAt: "",
+  lastCommitUrl: "",
+
+  hasPending() { return Object.keys(this.pending).length > 0; },
+  pendingCount() { return Object.keys(this.pending).length; },
+  isDirty() { return this.inFlight || this.hasPending(); },
+  persistPending() { writeJSON(localStorage, PENDING_KEY, this.pending); },
+  addPending(patch) { this.pending = mergePatches(this.pending, patch); this.persistPending(); },
+  discardPending() {
+    this.pending = {}; this.persistPending();
+    clearTimeout(this.timer); clearTimeout(this.maxTimer); clearTimeout(this.retryTimer);
+    this.timer = this.maxTimer = this.retryTimer = null;
+    this.setStatus("idle");
+    // Forget the local copy's timestamp so the next successful read of the
+    // published menu (even an identical one) replaces the discarded edits.
+    const state = loadState(); state.updatedAt = ""; saveState(state);
+    syncFromPublished({ force: true });
+  },
+  setStatus(status, detail) {
+    this.status = status; this.detail = detail || "";
+    renderSyncStatus();
+  },
+
+  // Called after every admin change.
+  schedule() {
+    if (!IS_ADMIN || !this.hasPending()) return;
+    if (!getToken()) { this.setStatus("disconnected"); openSyncSettings(); return; }
+    if (navigator.onLine === false) { this.setStatus("offline"); return; }
+    if (this.inFlight) { this.rerun = true; return; }
+    this.setStatus("pending");
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.publishNow(), CONFIG.publishDebounceMs);
+    if (!this.maxTimer) this.maxTimer = setTimeout(() => this.publishNow(), CONFIG.publishMaxWaitMs);
+  },
+
+  async publishNow() {
+    clearTimeout(this.timer); clearTimeout(this.maxTimer); clearTimeout(this.retryTimer);
+    this.timer = this.maxTimer = this.retryTimer = null;
+    if (this.inFlight) { this.rerun = true; return; }
+    if (!this.hasPending()) return;
+    const token = getToken();
+    if (!token) { this.setStatus("disconnected"); openSyncSettings(); return; }
+    if (navigator.onLine === false) { this.setStatus("offline"); return; }
+
+    const batch = this.pending;
+    this.pending = {}; this.persistPending();
+    this.inFlight = true;
+    this.setStatus("publishing");
+    try {
+      const result = await publishToGitHub(token, batch, {
+        onAttempt: n => { if (n > 0) this.setStatus("publishing", "Someone else just updated the menu – merging and retrying…"); }
+      });
+      // The published state is now the truth; keep any clicks made meanwhile on top.
+      const merged = applyPatch(result.state, this.pending);
+      merged.updatedAt = result.state.updatedAt;
+      saveState(merged);
+      this.retryCount = 0;
+      this.publishedAt = Date.now();
+      this.lastPublishedUpdatedAt = result.state.updatedAt;
+      this.lastCommitUrl = result.commitUrl || "";
+      this.inFlight = false;
+      this.setStatus("published");
+      renderAll();
+      lastFetchAt = 0; // start checking for the redeploy straight away
+    } catch (err) {
+      this.pending = mergePatches(batch, this.pending); // put the batch back, newer clicks win
+      this.persistPending();
+      this.inFlight = false;
+      if (err.auth) {
+        setToken("");
+        this.setStatus("disconnected", err.message);
+        openSyncSettings(err.message, "err");
+      } else {
+        this.setStatus("error", err.message || "Could not publish to GitHub.");
+        if (err.retryable && this.retryCount < 6) {
+          const delay = Math.min(2 * 60 * 1000, 5000 * Math.pow(2, this.retryCount++));
+          this.retryTimer = setTimeout(() => this.publishNow(), delay);
+        }
+      }
+      return;
+    }
+    if (this.rerun || this.hasPending()) { this.rerun = false; this.schedule(); }
+  },
+
+  onRemoteSeen(remoteTime) {
+    if (this.status === "published" && this.lastPublishedUpdatedAt && remoteTime >= parseTime(this.lastPublishedUpdatedAt)) {
+      this.setStatus("live");
+    } else if (this.status === "published") {
+      renderSyncStatus();
+    }
+  }
+};
+
+/* ------------------------------------------------------- Admin actions */
+function recordChange(patch) {
+  const state = applyPatch(loadState(), patch);
+  saveState(state);
+  publisher.addPending(patch);
+  renderAll();
+  publisher.schedule();
+}
+function setAvailability(id, available) {
+  const state = loadState();
+  if (state.availability[id] === available) return;
+  recordChange({ [id]: { available } });
+}
+function setPrice(id, price) {
+  const value = Math.round(Number(price));
+  if (!Number.isFinite(value) || value < 0) return false;
+  const state = loadState();
+  if (state.prices[id] === value) return true;
+  recordChange({ [id]: { price: value } });
+  return true;
+}
+function resetAllAvailable() {
+  const state = loadState();
+  const patch = {};
+  DISHES.forEach(d => { if (!state.availability[d.id]) patch[d.id] = { available: true }; });
+  if (Object.keys(patch).length) recordChange(patch);
+}
+
+/* --------------------------------------------------------- Sync panel UI */
+function openSyncSettings(message, kind) {
+  const panel = $("syncSettings");
+  if (!panel) return;
+  panel.hidden = false;
+  const btn = $("syncSettingsBtn");
+  if (btn) btn.setAttribute("aria-expanded", "true");
+  if (message !== undefined) setTokenMessage(message, kind);
+}
+function toggleSyncSettings() {
+  const panel = $("syncSettings");
+  if (!panel) return;
+  panel.hidden = !panel.hidden;
+  const btn = $("syncSettingsBtn");
+  if (btn) btn.setAttribute("aria-expanded", panel.hidden ? "false" : "true");
+}
+function setTokenMessage(text, kind) {
+  const el = $("tokenMessage");
+  if (!el) return;
+  el.textContent = text || "";
+  el.className = "sync-message" + (kind ? " " + kind : "");
+}
+function renderSyncStatus() {
+  const title = $("syncTitle"), detail = $("syncDetail"), dot = $("syncDot");
+  if (!title || !detail || !dot) return;
+  const token = getToken();
+  const user = getGitHubUser();
+  const pending = publisher.pendingCount();
+  const who = user ? " as @" + user : "";
+  const repoLink = '<a href="https://github.com/' + esc(CONFIG.repo) + '" target="_blank" rel="noopener">' + esc(CONFIG.repo) + "</a>";
+  let status = publisher.status;
+  if (!token) status = "disconnected";
+  else if (status === "idle" && pending) status = "pending";
+  else if (status === "offline" && navigator.onLine !== false) status = "pending";
+  else if (navigator.onLine === false && (pending || status === "pending")) status = "offline";
+
+  let tone = "ok", head = "", body = "";
+  switch (status) {
+    case "disconnected":
+      tone = "off";
+      head = "GitHub not connected";
+      body = pending
+        ? pending + " change" + (pending === 1 ? "" : "s") + " saved on this device only. Connect GitHub to publish " + (pending === 1 ? "it" : "them") + " to the customer menu."
+        : "Connect GitHub so price and availability changes publish to the customer menu automatically.";
+      if (publisher.detail) body = esc(publisher.detail) + " " + body;
+      break;
+    case "offline":
+      tone = "busy";
+      head = "You're offline";
+      body = pending + " change" + (pending === 1 ? "" : "s") + " saved on this device. " + (pending === 1 ? "It" : "They") + " will publish automatically when the connection is back.";
+      break;
+    case "pending":
+      tone = "busy";
+      head = "Saving…";
+      body = "Publishing to GitHub in a moment.";
+      break;
+    case "publishing":
+      tone = "busy";
+      head = "Publishing to GitHub…";
+      body = publisher.detail ? esc(publisher.detail) : "Committing " + esc(CONFIG.dataPath) + " to " + repoLink + ".";
+      break;
+    case "published": {
+      const waited = Date.now() - publisher.publishedAt;
+      head = "Published to GitHub ✓";
+      body = waited > CONFIG.liveCheckMaxMs
+        ? "The commit is on GitHub but the site has not redeployed yet. GitHub Pages may be delayed – check the repository's Pages/Actions status."
+        : "Customer menu goes live in about a minute (GitHub Pages is redeploying)…";
+      if (publisher.lastCommitUrl) body += ' <a href="' + esc(publisher.lastCommitUrl) + '" target="_blank" rel="noopener">View commit ↗</a>';
+      break;
+    }
+    case "live":
+      head = "Live on the customer menu ✓";
+      body = "All changes published" + (publisher.lastPublishedUpdatedAt ? " · " + formatTime(publisher.lastPublishedUpdatedAt) : "") + ". Connected" + esc(who) + ".";
+      break;
+    case "error":
+      tone = "err";
+      head = "Publish failed";
+      body = esc(publisher.detail || "Could not publish to GitHub.") + (publisher.retryTimer ? " Retrying automatically…" : "");
+      break;
+    default:
+      head = "Connected to GitHub" + who;
+      body = "Price and availability changes publish automatically to " + repoLink + ".";
+  }
+  dot.className = "sync-dot " + tone;
+  title.textContent = head;
+  detail.innerHTML = body;
+  const retry = $("syncRetryBtn");
+  if (retry) retry.hidden = !(status === "error" || (status === "offline" && navigator.onLine !== false));
+  const disconnect = $("disconnectBtn");
+  if (disconnect) disconnect.hidden = !token;
+  const discard = $("discardBtn");
+  if (discard) discard.hidden = !pending;
+  const connect = $("connectBtn");
+  if (connect) connect.textContent = token ? "Replace token" : "Connect";
+}
+
+async function connectGitHub(token) {
+  token = String(token || "").trim();
+  if (!token) { setTokenMessage("Paste a token first.", "err"); return; }
+  const connectBtn = $("connectBtn");
+  if (connectBtn) connectBtn.disabled = true;
+  setTokenMessage("Checking token…");
+  try {
+    const login = await verifyToken(token);
+    setToken(token, login);
+    const input = $("tokenInput");
+    if (input) input.value = "";
+    setTokenMessage("Connected" + (login ? " as @" + login : "") + ". Changes will now publish automatically.", "ok");
+    publisher.setStatus("idle");
+    if (publisher.hasPending()) publisher.schedule();
+    else setTimeout(() => { const panel = $("syncSettings"); if (panel) { panel.hidden = true; const b = $("syncSettingsBtn"); if (b) b.setAttribute("aria-expanded", "false"); } }, 1500);
+  } catch (err) {
+    setTokenMessage(err.message || "Could not verify the token.", "err");
+  } finally {
+    if (connectBtn) connectBtn.disabled = false;
+    renderSyncStatus();
+  }
+}
+function disconnectGitHub() {
+  setToken("");
+  setTokenMessage("Disconnected. Changes stay on this device until you connect again.");
+  publisher.setStatus("disconnected");
+}
+
+/* -------------------------------------------------------- Admin wiring */
+function initAdmin() {
+  const loginForm = $("loginForm");
+  if (loginForm) {
+    if (sessionStorage.getItem(ADMIN_SESSION) === "true") { adminLogin.hidden = true; adminApp.hidden = false; }
+    loginForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const u = $("loginUsername").value.trim();
+      const p = $("loginPassword").value;
+      const error = $("loginError");
+      if (u === "admin" && p === "admin") {
+        sessionStorage.setItem(ADMIN_SESSION, "true");
+        adminLogin.hidden = true; adminApp.hidden = false; error.textContent = "";
+        renderAdmin();
+        afterAdminVisible();
+      } else error.textContent = "Incorrect username or password.";
+    });
+  }
+
+  const list = $("adminMenu");
+  if (list) {
+    list.addEventListener("click", e => {
+      const btn = e.target.closest(".toggle");
+      if (!btn) return;
+      const id = Number(btn.dataset.id);
+      setAvailability(id, !loadState().availability[id]);
+    });
+    list.addEventListener("submit", e => {
+      const form = e.target.closest(".price-editor");
+      if (!form) return;
+      e.preventDefault();
+      const id = Number(form.dataset.priceForm);
+      const input = form.querySelector(".price-input");
+      if (!setPrice(id, input.value)) { input.value = loadState().prices[id]; return; }
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    });
+  }
+
+  const resetBtn = $("resetBtn");
+  if (resetBtn) resetBtn.addEventListener("click", () => { if (confirm("Reset all dishes to available?")) resetAllAvailable(); });
+
+  const settingsBtn = $("syncSettingsBtn");
+  if (settingsBtn) settingsBtn.addEventListener("click", toggleSyncSettings);
+  const retryBtn = $("syncRetryBtn");
+  if (retryBtn) retryBtn.addEventListener("click", () => { publisher.retryCount = 0; publisher.publishNow(); });
+  const tokenForm = $("tokenForm");
+  if (tokenForm) tokenForm.addEventListener("submit", e => { e.preventDefault(); connectGitHub($("tokenInput").value); });
+  const disconnectBtn = $("disconnectBtn");
+  if (disconnectBtn) disconnectBtn.addEventListener("click", disconnectGitHub);
+  const discardBtn = $("discardBtn");
+  if (discardBtn) discardBtn.addEventListener("click", () => {
+    if (confirm("Discard the unpublished changes on this device and reload the published menu?")) publisher.discardPending();
+  });
+
+  window.addEventListener("beforeunload", e => {
+    if (publisher.isDirty() && getToken()) { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  if (adminVisible()) afterAdminVisible();
+}
+
+// Runs once the dashboard is on screen: verify the saved token quietly and
+// publish anything that is still waiting from a previous visit.
+let adminStarted = false;
+function afterAdminVisible() {
+  if (adminStarted) return;
+  adminStarted = true;
+  const token = getToken();
+  if (!token) { publisher.setStatus("disconnected"); openSyncSettings(); return; }
+  publisher.setStatus("idle");
+  if (publisher.hasPending()) publisher.schedule();
+  else {
+    verifyToken(token).then(login => { if (login) setToken(token, login); renderSyncStatus(); }).catch(err => {
+      if (err.auth) { setToken(""); publisher.setStatus("disconnected", err.message); openSyncSettings(err.message, "err"); }
+    });
+  }
+}
+
+/* ------------------------------------------------------------------ Boot */
+window.addEventListener("storage", e => {
+  if (e.key === THEME_KEY) applyTheme();
+  if (e.key === MENU_STATE_KEY || e.key === null) renderAll();
+  if (IS_ADMIN && (e.key === PENDING_KEY || e.key === GITHUB_TOKEN_KEY || e.key === GITHUB_USER_KEY)) {
+    if (e.key === PENDING_KEY) publisher.pending = readJSON(localStorage, PENDING_KEY, {}) || {};
+    renderSyncStatus();
+  }
+});
+
+async function boot() {
+  const hasMenuPage = Boolean($("menu")) || IS_ADMIN;
+  if (IS_ADMIN) initAdmin();
+  if (!hasMenuPage) return;
+  const haveLocal = hasLocalState();
+  if (haveLocal) renderAll();
+  await syncFromPublished();        // first-time visitors wait for the real menu
+  if (!haveLocal) renderAll();       // (falls back to the built-in catalog if offline)
+  startPolling();
+}
+boot();
+
+// Handy for debugging from the browser console.
+window.SpiceStreetMenu = {
+  config: CONFIG, dishes: DISHES, loadState, syncFromPublished, publisher,
+  setAvailability, setPrice, resetAllAvailable, connectGitHub, disconnectGitHub,
+  publishToGitHub, verifyToken, commitMessage, applyPatch, stateFromItems, itemsFromState
+};

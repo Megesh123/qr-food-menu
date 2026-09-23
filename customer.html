@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spice Street - Digital Menu</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=6">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=14">
+  <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
   <header class="topbar">
@@ -20,14 +20,15 @@
     <section class="hero">
       <div><span class="status-dot"></span><strong>Today's menu</strong></div>
       <p>Choose a category and check live availability before ordering.</p>
+      <small id="menuUpdated" class="menu-updated"></small>
     </section>
     <div class="legend">
       <span><i class="available"></i> Available</span>
       <span><i class="unavailable"></i> Sold out</span>
     </div>
-    <section id="menu" class="menu-sections"></section>
+    <section id="menu" class="menu-sections"><p class="menu-loading">Loading today’s menu…</p></section>
   </main>
   <footer><p>Scan • Choose • Enjoy</p><small>Powered by your digital menu</small></footer>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=14"></script>
 </body>
 </html>

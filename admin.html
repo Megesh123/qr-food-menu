@@ -5,20 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Spice Street - Admin</title>
-  <!-- Forwards to the canonical dashboard at /admin. Keeping this as a stub
-       means the admin markup exists in exactly one place (/admin/index.html),
-       and the page is no longer indexable as a duplicate. -->
-  <meta http-equiv="refresh" content="0; url=admin">
+  <!-- Legacy entry point; forwards to the canonical admin folder. -->
+  <meta http-equiv="refresh" content="0; url=/admin/">
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=15">
   <link rel="stylesheet" href="styles.css?v=15">
-  <script>location.replace("admin" + location.search + location.hash);</script>
+  <script>location.replace("/admin/" + location.search + location.hash);</script>
 </head>
 <body class="admin-page">
   <main class="container redirect-card">
     <p class="eyebrow">RESTAURANT ADMIN</p>
     <h1>Spice Street</h1>
     <p>Opening the admin dashboard…</p>
-    <div class="notfound-actions"><a class="primary-btn" href="admin">Continue to the dashboard →</a></div>
+    <div class="notfound-actions"><a class="primary-btn" href="/admin/">Continue to the dashboard →</a></div>
   </main>
 </body>
 </html>

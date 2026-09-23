@@ -168,7 +168,11 @@ function parseTime(iso) { const t = Date.parse(iso || ""); return Number.isFinit
 function formatTime(iso) {
   const t = parseTime(iso);
   if (!t) return "";
-  return new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  return new Date(t).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  });
 }
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -539,8 +543,15 @@ function initCustomerTools() {
 
 const adminLogin = $("adminLogin");
 const adminApp = $("adminApp");
+const masterLogin = $("masterLogin");
+const masterApp = $("masterApp");
 const IS_ADMIN = Boolean(adminApp);
+const IS_MASTER_ADMIN = Boolean(masterApp);
+const MASTER_SESSION = "spice-street-master-session";
+const MASTER_LOGIN_ATTEMPTS_KEY = "spice-street-master-login-attempts-v1";
+const MASTER_CREDENTIAL_SHA256 = "3fd8ea76d8a4a2072a717edb267d982a8bc42a1cdc74d3a90514c1a4577d6cd0"; // masteradmin:masteradmin
 function adminVisible() { return IS_ADMIN && !adminApp.hidden; }
+function masterVisible() { return IS_MASTER_ADMIN && !masterApp.hidden; }
 
 function buildAdminList(state) {
   let html = "", lastCategory = "";
@@ -803,7 +814,7 @@ const publisher = {
   // Called after every admin change.
   schedule() {
     if (!IS_ADMIN || !this.hasPending()) return;
-    if (!getToken()) { this.setStatus("disconnected"); openSyncSettings(); return; }
+    if (!getToken()) { this.setStatus("disconnected", "GitHub publishing is managed by Master Admin."); return; }
     if (navigator.onLine === false) { this.setStatus("offline"); return; }
     if (this.inFlight) { this.rerun = true; return; }
     this.setStatus("pending");
@@ -818,7 +829,7 @@ const publisher = {
     if (this.inFlight) { this.rerun = true; return; }
     if (!this.hasPending()) return;
     const token = getToken();
-    if (!token) { this.setStatus("disconnected"); openSyncSettings(); return; }
+    if (!token) { this.setStatus("disconnected", "GitHub publishing is managed by Master Admin."); return; }
     if (navigator.onLine === false) { this.setStatus("offline"); return; }
 
     const batch = this.pending;
@@ -847,8 +858,7 @@ const publisher = {
       this.inFlight = false;
       if (err.auth) {
         setToken("");
-        this.setStatus("disconnected", err.message);
-        openSyncSettings(err.message, "err");
+        this.setStatus("disconnected", "GitHub connection expired. Master Admin must renew the token.");
       } else {
         this.setStatus("error", err.message || "Could not publish to GitHub.");
         if (err.retryable && this.retryCount < 6) {
@@ -900,6 +910,8 @@ function resetAllAvailable() {
 
 /* --------------------------------------------------------- Sync panel UI */
 function openSyncSettings(message, kind) {
+  // GitHub token management belongs exclusively to Master Admin.
+  if (!IS_MASTER_ADMIN) return;
   const panel = $("syncSettings");
   if (!panel) return;
   panel.hidden = false;
@@ -924,66 +936,64 @@ function renderSyncStatus() {
   const title = $("syncTitle"), detail = $("syncDetail"), dot = $("syncDot");
   if (!title || !detail || !dot) return;
   const token = getToken();
-  const user = getGitHubUser();
   const pending = publisher.pendingCount();
-  const who = user ? " as @" + user : "";
-  const repoLink = '<a href="https://github.com/' + esc(CONFIG.repo) + '" target="_blank" rel="noopener">' + esc(CONFIG.repo) + "</a>";
   let status = publisher.status;
   if (!token) status = "disconnected";
   else if (status === "idle" && pending) status = "pending";
   else if (status === "offline" && navigator.onLine !== false) status = "pending";
   else if (navigator.onLine === false && (pending || status === "pending")) status = "offline";
 
-  let tone = "ok", head = "", body = "";
+  const latest = lastRemoteUpdatedAt || publisher.lastPublishedUpdatedAt || loadState().updatedAt;
+  const latestLabel = latest ? "Menu updated " + formatTime(latest) : "Menu status";
+  let tone = "ok", head = latestLabel, body = "Price and availability changes publish automatically.";
+
   switch (status) {
     case "disconnected":
-      tone = "off";
-      head = "GitHub not connected";
+      tone = pending ? "busy" : "off";
+      head = latestLabel;
       body = pending
-        ? pending + " change" + (pending === 1 ? "" : "s") + " saved on this device only. Connect GitHub to publish " + (pending === 1 ? "it" : "them") + " to the customer menu."
-        : "Connect GitHub so price and availability changes publish to the customer menu automatically.";
-      if (publisher.detail) body = esc(publisher.detail) + " " + body;
+        ? "Changes are waiting for Master Admin to connect or renew GitHub."
+        : "GitHub publishing is managed by Master Admin.";
       break;
     case "offline":
       tone = "busy";
-      head = "You're offline";
-      body = pending + " change" + (pending === 1 ? "" : "s") + " saved on this device. " + (pending === 1 ? "It" : "They") + " will publish automatically when the connection is back.";
+      head = latestLabel;
+      body = pending
+        ? pending + " change" + (pending === 1 ? "" : "s") + " saved on this device. It will publish when the connection returns."
+        : "You're offline. The menu will sync when the connection returns.";
       break;
     case "pending":
       tone = "busy";
-      head = "Saving…";
-      body = "Publishing to GitHub in a moment.";
+      head = "Saving changes…";
+      body = "Publishing the latest menu update shortly.";
       break;
     case "publishing":
       tone = "busy";
-      head = "Publishing to GitHub…";
-      body = publisher.detail ? esc(publisher.detail) : "Committing " + esc(CONFIG.dataPath) + " to " + repoLink + ".";
+      head = "Publishing menu…";
+      body = "Saving the latest price and availability changes.";
       break;
-    case "published": {
-      const waited = Date.now() - publisher.publishedAt;
-      head = "Published to GitHub ✓";
-      body = waited > CONFIG.liveCheckMaxMs
-        ? "The commit is on GitHub but the site has not redeployed yet. GitHub Pages may be delayed – check the repository's Pages/Actions status."
-        : "Customer menu goes live in about a minute (GitHub Pages is redeploying)…";
-      if (publisher.lastCommitUrl) body += ' <a href="' + esc(publisher.lastCommitUrl) + '" target="_blank" rel="noopener">View commit ↗</a>';
+    case "published":
+      head = "Menu updated " + formatTime(publisher.lastPublishedUpdatedAt || latest);
+      body = "Customer menu is being refreshed.";
       break;
-    }
     case "live":
-      head = "Live on the customer menu ✓";
-      body = "All changes published" + (publisher.lastPublishedUpdatedAt ? " · " + formatTime(publisher.lastPublishedUpdatedAt) : "") + ". Connected" + esc(who) + ".";
+      head = "Menu updated " + formatTime(publisher.lastPublishedUpdatedAt || latest);
+      body = "Latest changes are live on the customer menu.";
       break;
     case "error":
       tone = "err";
-      head = "Publish failed";
-      body = esc(publisher.detail || "Could not publish to GitHub.") + (publisher.retryTimer ? " Retrying automatically…" : "");
+      head = latestLabel;
+      body = esc(publisher.detail || "Could not publish to GitHub.") +
+        " If the token has expired, Master Admin must renew it.";
       break;
     default:
-      head = "Connected to GitHub" + who;
-      body = "Price and availability changes publish automatically to " + repoLink + ".";
+      head = latestLabel;
+      body = "Price and availability changes publish automatically.";
   }
+
   dot.className = "sync-dot " + tone;
   title.textContent = head;
-  detail.innerHTML = body;
+  detail.textContent = body;
   const retry = $("syncRetryBtn");
   if (retry) retry.hidden = !(status === "error" || (status === "offline" && navigator.onLine !== false));
   const disconnect = $("disconnectBtn");
@@ -993,7 +1003,6 @@ function renderSyncStatus() {
   const connect = $("connectBtn");
   if (connect) connect.textContent = token ? "Replace token" : "Connect";
 }
-
 async function connectGitHub(token) {
   token = String(token || "").trim();
   if (!token) { setTokenMessage("Paste a token first.", "err"); return; }
@@ -1163,14 +1172,113 @@ function afterAdminVisible() {
   if (adminStarted) return;
   adminStarted = true;
   const token = getToken();
-  if (!token) { publisher.setStatus("disconnected"); openSyncSettings(); return; }
+  if (!token) { publisher.setStatus("disconnected", "GitHub publishing is managed by Master Admin."); return; }
   publisher.setStatus("idle");
   if (publisher.hasPending()) publisher.schedule();
   else {
     verifyToken(token).then(login => { if (login) setToken(token, login); renderSyncStatus(); }).catch(err => {
-      if (err.auth) { setToken(""); publisher.setStatus("disconnected", err.message); openSyncSettings(err.message, "err"); }
+      if (err.auth) { setToken(""); publisher.setStatus("disconnected", "GitHub connection expired. Master Admin must renew the token."); }
     });
   }
+}
+
+
+/* ---------------------------------------------------------- Master Admin */
+// Master Admin is the only UI that can manage the GitHub publishing token.
+// The token itself is still kept in browser localStorage; for production-grade
+// secret isolation, move GitHub publishing behind a server-side/edge function.
+function readMasterAttempts() { return readJSON(localStorage, MASTER_LOGIN_ATTEMPTS_KEY, { count: 0, lockedUntil: 0 }) || { count: 0, lockedUntil: 0 }; }
+function writeMasterAttempts(v) { writeJSON(localStorage, MASTER_LOGIN_ATTEMPTS_KEY, v); }
+function masterLockRemaining() {
+  const a = readMasterAttempts();
+  return Math.max(0, Number(a.lockedUntil || 0) - Date.now());
+}
+function masterLoginError(message) {
+  const el = $("masterLoginError");
+  if (el) el.textContent = message || "";
+}
+async function submitMasterLogin() {
+  const form = $("masterLoginForm");
+  if (!form) return false;
+  if (masterLockRemaining()) {
+    masterLoginError("Too many attempts. Try again in " + Math.ceil(masterLockRemaining() / 1000) + "s.");
+    return false;
+  }
+  const username = ($("masterUsername")?.value || "").trim().toLowerCase();
+  const passcode = $("masterPassword")?.value || "";
+  const button = form.querySelector(".login-btn");
+  if (button) { button.disabled = true; button.textContent = "Checking…"; }
+  let ok = false;
+  try { ok = sameDigest(await hashCredentials(username, passcode), MASTER_CREDENTIAL_SHA256); } catch (e) {}
+  if ($("masterPassword")) $("masterPassword").value = "";
+  if (button) { button.disabled = false; button.textContent = "Sign in"; }
+  if (ok) {
+    writeMasterAttempts({ count: 0, lockedUntil: 0 });
+    sessionStorage.setItem(MASTER_SESSION, "true");
+    if (masterLogin) masterLogin.hidden = true;
+    if (masterApp) masterApp.hidden = false;
+    renderMasterAdmin();
+    return true;
+  }
+  const attempts = readMasterAttempts();
+  attempts.count = Number(attempts.count || 0) + 1;
+  if (attempts.count >= 5) {
+    attempts.count = 0;
+    attempts.lockedUntil = Date.now() + 30000;
+    writeMasterAttempts(attempts);
+    masterLoginError("Too many attempts. Try again in 30s.");
+  } else {
+    writeMasterAttempts(attempts);
+    masterLoginError("Incorrect master username or passcode. " + (5 - attempts.count) + " attempts left.");
+  }
+  return false;
+}
+function renderMasterAdmin(message, kind) {
+  const status = $("masterStatus");
+  if (!status) return;
+  const token = getToken();
+  status.className = "sync-message " + (kind || (token ? "ok" : ""));
+  status.textContent = message || (token
+    ? "GitHub token is connected. Normal Admin can publish menu changes."
+    : "No GitHub token is connected. Connect one here to enable publishing.");
+  const disconnect = $("masterDisconnectBtn");
+  if (disconnect) disconnect.hidden = !token;
+}
+async function masterConnectGitHub(token) {
+  token = String(token || "").trim();
+  if (!token) { renderMasterAdmin("Paste a GitHub token first.", "err"); return; }
+  const btn = $("masterConnectBtn");
+  if (btn) btn.disabled = true;
+  renderMasterAdmin("Checking GitHub token…");
+  try {
+    const login = await verifyToken(token);
+    setToken(token, login);
+    if ($("masterTokenInput")) $("masterTokenInput").value = "";
+    renderMasterAdmin("GitHub token connected successfully. Normal Admin can now publish menu changes.", "ok");
+  } catch (err) {
+    renderMasterAdmin(err.message || "Could not verify the GitHub token.", "err");
+  } finally {
+    if (btn) btn.disabled = false;
+    renderMasterAdmin();
+  }
+}
+function masterDisconnectGitHub() {
+  setToken("");
+  renderMasterAdmin("GitHub token disconnected. Normal Admin changes will wait until Master Admin connects a token.", "");
+}
+function initMasterAdmin() {
+  if (!IS_MASTER_ADMIN) return;
+  if (sessionStorage.getItem(MASTER_SESSION) === "true") {
+    masterLogin.hidden = true;
+    masterApp.hidden = false;
+  }
+  const form = $("masterLoginForm");
+  if (form) form.addEventListener("submit", e => { e.preventDefault(); submitMasterLogin(); });
+  const tokenForm = $("masterTokenForm");
+  if (tokenForm) tokenForm.addEventListener("submit", e => { e.preventDefault(); masterConnectGitHub($("masterTokenInput").value); });
+  const disconnect = $("masterDisconnectBtn");
+  if (disconnect) disconnect.addEventListener("click", masterDisconnectGitHub);
+  if (masterVisible()) renderMasterAdmin();
 }
 
 /* ------------------------------------------------------------------ Boot */
@@ -1185,7 +1293,9 @@ window.addEventListener("storage", e => {
 
 async function boot() {
   const hasMenuPage = Boolean($("menu")) || IS_ADMIN;
+  if (IS_MASTER_ADMIN) initMasterAdmin();
   if (IS_ADMIN) initAdmin();
+  if (IS_MASTER_ADMIN) return;
   if (!hasMenuPage) return;
   initCustomerTools();
   const haveLocal = hasLocalState();
@@ -1206,5 +1316,6 @@ window.SpiceStreetMenu = {
   menuFilter, renderCustomer, initCustomerTools, resetFilters, matchesFilter, escHighlight, slugify,
   // admin passcode
   hashCredentials, sha256Hex, sha256Pure, sameDigest, readAttempts, lockRemaining,
-  DEFAULT_CREDENTIAL_SHA256
+  DEFAULT_CREDENTIAL_SHA256,
+  masterConnectGitHub, masterDisconnectGitHub
 };

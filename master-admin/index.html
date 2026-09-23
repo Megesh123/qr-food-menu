@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Spice Street - Master Admin</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=16">
+  <link rel="stylesheet" href="/styles.css?v=16">
+</head>
+<body class="admin-page">
+  <header class="topbar admin-topbar">
+    <div>
+      <p class="eyebrow">MASTER ADMIN</p>
+      <h1>Spice Street</h1>
+      <p class="sub">Manage GitHub publishing access</p>
+    </div>
+    <div class="top-actions">
+      <a class="admin-link" href="/admin/">Restaurant Admin</a>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button>
+    </div>
+  </header>
+
+  <section id="masterLogin" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">🔐</div>
+      <p class="eyebrow">SPICE STREET</p>
+      <h2>Master Admin</h2>
+      <p class="login-sub">Sign in to manage the GitHub token used for menu publishing.</p>
+      <form id="masterLoginForm">
+        <label>Username<input id="masterUsername" type="text" autocomplete="username" required></label>
+        <label>Password<input id="masterPassword" type="password" autocomplete="current-password" required></label>
+        <button class="login-btn" type="submit">Sign in</button>
+        <p id="masterLoginError" class="login-error" role="alert"></p>
+      </form>
+    </div>
+  </section>
+
+  <main id="masterApp" class="container admin-container" hidden>
+    <section class="sync-panel">
+      <div class="sync-row">
+        <span class="sync-dot ok" aria-hidden="true"></span>
+        <div class="sync-text">
+          <strong>GitHub Settings</strong>
+          <span>Use this page when the GitHub token expires, is revoked, or needs to be replaced.</span>
+        </div>
+      </div>
+      <div class="sync-settings" style="display:block">
+        <p class="sync-help">The token is used only by this browser to publish <code>menu-data.json</code> to <strong>Megesh123/qr-food-menu</strong>. Use a fine-grained token with repository access limited to this repository and <strong>Contents: Read and write</strong>.</p>
+        <form id="masterTokenForm" class="token-form" autocomplete="off">
+          <input id="masterTokenInput" type="password" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="GitHub token">
+          <button id="masterConnectBtn" class="sync-btn primary" type="submit">Connect / Replace</button>
+          <button id="masterDisconnectBtn" class="sync-btn" type="button" hidden>Disconnect</button>
+        </form>
+        <p id="masterStatus" class="sync-message" role="status"></p>
+        <ol class="sync-steps">
+          <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create a token ↗</a>.</li>
+          <li>Select <em>Only select repositories → qr-food-menu</em>.</li>
+          <li>Set <em>Contents: Read and write</em>, generate the token, then paste it above.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+  <script src="/app.js?v=17"></script>
+</body>
+</html>

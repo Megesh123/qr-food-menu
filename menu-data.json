@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T11:50:30.158Z",
+  "updatedAt": "2026-09-23T11:52:11.372Z",
   "items": [
     {
       "id": 1,
@@ -558,15 +558,6 @@
       "price": 30,
       "description": "Hot Indian tea brewed with aromatic spices.",
       "veg": true,
-      "available": true
-    },
-    {
-      "id": 63,
-      "name": "sdvs",
-      "category": "svdSV",
-      "price": 45,
-      "description": "",
-      "veg": false,
       "available": true
     }
   ]

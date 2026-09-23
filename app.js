@@ -1055,8 +1055,7 @@ async function submitLogin() {
     sessionStorage.setItem(ADMIN_SESSION, "true");
     adminLogin.hidden = true; adminApp.hidden = false;
     if (error) error.textContent = "";
-    warnIfDefaultPasscode();
-    renderAdmin();
+renderAdmin();
     afterAdminVisible();
     return true;
   }
@@ -1102,29 +1101,14 @@ function showLockout() {
   lockoutTicker = setInterval(tick, 500);
 }
 
-// Nudges the owner to replace admin/admin, which is still the default hash.
-function warnIfDefaultPasscode() {
-  const app = $("adminApp");
-  if (!app || $("defaultPasscodeNotice")) return;
-  if (!sameDigest(String(CONFIG.adminCredentialSha256 || "").trim().toLowerCase(), DEFAULT_CREDENTIAL_SHA256)) return;
-  const notice = document.createElement("div");
-  notice.className = "notice";
-  notice.id = "defaultPasscodeNotice";
-  notice.innerHTML = "<strong>Still using the default sign-in</strong>" +
-    "<span>admin / admin is the shipped credential, so anyone who finds this page can change your menu. " +
-    "Pick your own: in the browser console run " +
-    "<code>SpiceStreetMenu.hashCredentials(\"you\", \"your passcode\")</code> and put the hash in " +
-    "<code>window.SPICE_STREET_CONFIG.adminCredentialSha256</code> before app.js loads. " +
-    '<a href="https://github.com/' + esc(CONFIG.repo) + '#admin-sign-in" target="_blank" rel="noopener">Step-by-step</a></span>';
-  app.insertBefore(notice, app.firstChild);
-}
+
 
 function initAdmin() {
   const loginForm = $("loginForm");
   if (loginForm) {
     if (sessionStorage.getItem(ADMIN_SESSION) === "true") {
       adminLogin.hidden = true; adminApp.hidden = false;
-      warnIfDefaultPasscode();              // also on a reload within the session
+// also on a reload within the session
     }
     loginForm.addEventListener("submit", e => { e.preventDefault(); submitLogin(); });
     if (lockRemaining()) showLockout();     // a lock survives a page reload

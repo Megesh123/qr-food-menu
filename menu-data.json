@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T08:39:01.364Z",
+  "updatedAt": "2026-09-23T08:40:10.957Z",
   "items": [
     {
       "id": 1,
@@ -8,7 +8,7 @@
       "category": "Biriyani & Rice",
       "price": 120,
       "description": "Basmati rice, chicken and aromatic spices.",
-      "available": true
+      "available": false
     },
     {
       "id": 2,

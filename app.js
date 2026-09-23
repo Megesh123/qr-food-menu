@@ -808,9 +808,11 @@ async function fetchRepoMenuFile(token) {
 function describeChange(id, change) {
   const dish = DISH_BY_ID.get(Number(id));
   const parts = [];
+  if (change.deleted === true) parts.push("deleted");
+  else if (change.deleted === false) parts.push("restored");
   if (typeof change.available === "boolean") parts.push(change.available ? "available" : "sold out");
   if (Number.isFinite(change.price)) parts.push("price ₹" + change.price);
-  return (dish ? dish.name : "Item " + id) + " → " + parts.join(", ");
+  return (dish ? dish.name : "Item " + id) + " → " + (parts.join(", ") || "updated");
 }
 function commitMessage(batch) {
   const ids = Object.keys(batch);
@@ -921,6 +923,13 @@ async function publishToGitHub(token, batch, { onAttempt } = {}) {
 
 /* ------------------------------------------------------------ Publisher */
 // Batches admin changes and commits them to GitHub automatically.
+let lastAddedDishName = "";
+function setAddDishMessage(text, kind) {
+  const el = $("addDishMessage");
+  if (!el) return;
+  el.textContent = text || "";
+  el.className = "sync-message" + (kind ? " " + kind : "");
+}
 const publisher = {
   pending: readJSON(localStorage, PENDING_KEY, {}) || {},
   status: "idle",       // idle | disconnected | offline | pending | publishing | published | live | error
@@ -994,6 +1003,9 @@ const publisher = {
       this.lastCommitUrl = result.commitUrl || "";
       this.inFlight = false;
       this.setStatus("published");
+      if (lastAddedDishName) {
+        setAddDishMessage(lastAddedDishName + " published. Waiting for the customer menu to refresh…", "ok");
+      }
       renderAll();
       lastFetchAt = 0; // start checking for the redeploy straight away
     } catch (err) {
@@ -1003,8 +1015,10 @@ const publisher = {
       if (err.auth) {
         setToken("");
         this.setStatus("disconnected", "GitHub connection expired. Master Admin must renew the token.");
+        if (lastAddedDishName) setAddDishMessage(lastAddedDishName + " is waiting for the GitHub connection.", "err");
       } else {
         this.setStatus("error", err.message || "Could not publish to GitHub.");
+        if (lastAddedDishName) setAddDishMessage(lastAddedDishName + " could not be published yet.", "err");
         if (err.retryable && this.retryCount < 6) {
           const delay = Math.min(2 * 60 * 1000, 5000 * Math.pow(2, this.retryCount++));
           this.retryTimer = setTimeout(() => this.publishNow(), delay);
@@ -1018,6 +1032,10 @@ const publisher = {
   onRemoteSeen(remoteTime) {
     if (this.status === "published" && this.lastPublishedUpdatedAt && remoteTime >= parseTime(this.lastPublishedUpdatedAt)) {
       this.setStatus("live");
+      if (lastAddedDishName) {
+        setAddDishMessage(lastAddedDishName + " is live on the customer menu.", "ok");
+        lastAddedDishName = "";
+      }
     } else if (this.status === "published") {
       renderSyncStatus();
     }
@@ -1044,6 +1062,7 @@ function addDish({ name, category, price, description, veg }) {
   state.prices[id] = price;
   saveState(state);
   publisher.addPending({ [id]: { available: true, price, deleted: false } });
+  lastAddedDishName = dish.name;
   renderAll();
   publisher.schedule();
   return { ok: true, dish };

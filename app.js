@@ -976,7 +976,7 @@ async function renderMonitor() {
     return;
   }
   box.innerHTML = '<div class="empty-state"><span>Loading visit statistics…</span></div>';
-  const [day, week, month] = await Promise.all([fetchVisitCount(0), fetchVisitCount(7), fetchVisitCount(30)]);
+  const [day, week, month] = await Promise.all([fetchVisitCount(0), fetchVisitCount(6), fetchVisitCount(29)]);
   box.innerHTML = [
     ["Today", day], ["Last 7 days", week], ["Last 30 days", month]
   ].map(([label, value]) => '<div class="monitor-stat"><strong>' + (value === null ? "—" : value.toLocaleString("en-IN")) + '</strong><span>' + label + '</span></div>').join("");
@@ -1450,7 +1450,7 @@ function startAnalyticsTracking() {
   script.async = true;
   script.src = "https://gc.zgo.at/count.v5.js";
   script.crossOrigin = "anonymous";
-  script.integrity = "sha384-atnOLvQb9t+jSipvd75X2yginT4PjVbDqlJAmxMm+wYElFmeR6EmLP5bYeoRVQ";
+  script.integrity = "sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbDqlJAmxMm+wYElFmeR6EmLP5bYeoRVQ";
   document.head.appendChild(script);
 }
 
@@ -1461,6 +1461,7 @@ async function boot() {
   if (IS_MASTER_ADMIN) return;
   if (!hasMenuPage) return;
   initCustomerTools();
+  fetchAnalyticsConfig().then(startAnalyticsTracking);
   const haveLocal = hasLocalState();
   if (haveLocal) renderAll();
   await syncFromPublished();        // first-time visitors wait for the real menu

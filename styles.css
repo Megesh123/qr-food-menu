@@ -47,3 +47,5 @@ body.light.landing-page{background:radial-gradient(circle at 50% -10%,#fff 0,#f7
 .admin-container{display:block;}
 
 .publish-btn{border:0;background:var(--text);color:var(--bg);border-radius:15px;padding:12px 16px;cursor:pointer;font-weight:900}.publish-btn:hover{opacity:.9}@media(max-width:620px){.publish-btn{grid-column:1/-1}}
+
+.header-publish{white-space:nowrap;padding:10px 14px;border-radius:10px}.header-publish:hover{opacity:.9}@media(max-width:720px){.header-publish{order:3;width:100%}.admin-topbar .top-actions{width:100%}.admin-topbar .top-actions .admin-link,.admin-topbar .top-actions .theme-toggle{flex:1}}

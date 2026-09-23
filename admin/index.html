@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Spice Street - Admin</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=7">
-  <link rel="stylesheet" href="/styles.css?v=10">
+  <link rel="stylesheet" href="/styles.css?v=11">
 </head>
 <body class="admin-page">
   <header class="topbar admin-topbar">
@@ -15,7 +15,7 @@
       <h1>Spice Street</h1>
       <p class="sub">Manage availability & menu pricing</p>
     </div>
-    <div class="top-actions"><a class="admin-link" href="/customer">Customer View</a><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button></div>
+    <div class="top-actions"><a class="admin-link" href="/customer">Customer View</a><button id="headerPublishBtn" class="publish-btn header-publish" type="button">⬆ Update GitHub</button><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch theme"></button></div>
   </header>
   <section id="adminLogin" class="login-screen"><div class="login-card"><div class="login-logo">🍽️</div><p class="eyebrow">SPICE STREET</p><h2>Restaurant Admin</h2><p class="login-sub">Sign in to manage today’s menu availability.</p><form id="loginForm"><label>Username<input id="loginUsername" type="text" autocomplete="username" required></label><label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label><button class="login-btn" type="submit">Sign in</button><p id="loginError" class="login-error"></p></form><small class="test-note">Testing login: admin / admin</small></div></section><main id="adminApp" class="container admin-container" hidden>
     <section class="admin-summary">
@@ -25,6 +25,6 @@
     </section>
     <section id="adminMenu" class="admin-list"></section>
   </main>
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

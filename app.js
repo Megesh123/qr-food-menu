@@ -1288,6 +1288,7 @@ window.addEventListener("storage", e => {
   if (IS_ADMIN && (e.key === PENDING_KEY || e.key === GITHUB_TOKEN_KEY || e.key === GITHUB_USER_KEY)) {
     if (e.key === PENDING_KEY) publisher.pending = readJSON(localStorage, PENDING_KEY, {}) || {};
     renderSyncStatus();
+    if (e.key === GITHUB_TOKEN_KEY && getToken()) publisher.schedule();
   }
 });
 

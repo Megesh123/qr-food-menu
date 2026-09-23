@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T12:27:23.655Z",
+  "updatedAt": "2026-09-23T12:27:34.511Z",
   "items": [
     {
       "id": 1,
@@ -18,7 +18,7 @@
       "price": 180,
       "description": "Slow-cooked mutton with fragrant biriyani rice.",
       "veg": false,
-      "available": false
+      "available": true
     },
     {
       "id": 3,
@@ -27,7 +27,7 @@
       "price": 110,
       "description": "Fragrant biriyani rice with seasoned boiled egg.",
       "veg": false,
-      "available": false
+      "available": true
     },
     {
       "id": 4,
@@ -36,7 +36,7 @@
       "price": 100,
       "description": "Basmati rice cooked with fresh vegetables and spices.",
       "veg": true,
-      "available": false
+      "available": true
     },
     {
       "id": 5,

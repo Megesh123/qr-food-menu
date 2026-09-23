@@ -106,9 +106,10 @@ const GITHUB_TOKEN_KEY="spice-street-github-token-v1";
 async function getPublishedMenu(){
   try{const r=await fetch("/menu-data.json?v="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("Menu data unavailable");return await r.json()}catch(e){return null}
 }
+let publishQueue=Promise.resolve();
 async function publishMenuToGitHub(){
-  const token=sessionStorage.getItem(GITHUB_TOKEN_KEY)||prompt("Enter a GitHub fine-grained token with Contents: Read and write permission for this repository. It is kept only in this browser session.");
-  if(!token)return;
+  const token=sessionStorage.getItem(GITHUB_TOKEN_KEY)||prompt("Enter your GitHub fine-grained token once. It is kept only in this browser session and is used to publish menu changes.");
+  if(!token)return false;
   sessionStorage.setItem(GITHUB_TOKEN_KEY,token);
   const state=getAvailability(),prices=getPrices();
   const payload={version:1,updatedAt:new Date().toISOString(),items:DISHES.map(d=>({...d,price:Number(prices[d.id]??d.price),available:Boolean(state[d.id])}))};
@@ -117,25 +118,25 @@ async function publishMenuToGitHub(){
     const existing=await fetch("https://api.github.com/repos/"+GITHUB_REPO+"/contents/"+GITHUB_DATA_PATH+"?ref="+GITHUB_BRANCH,{headers});
     let sha="";
     if(existing.ok){const data=await existing.json();sha=data.sha}
-    const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(payload,null,2)+"\n")));
+    const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(payload,null,2)+"\\n")));
     const body={message:"Update live menu data",content:encoded,branch:GITHUB_BRANCH,...(sha?{sha}:{})};
     const r=await fetch("https://api.github.com/repos/"+GITHUB_REPO+"/contents/"+GITHUB_DATA_PATH,{method:"PUT",headers,body:JSON.stringify(body)});
     if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.message||"GitHub update failed")}
-    alert("Menu updated in GitHub successfully. The customer menu will use the published data after GitHub Pages refreshes.");
-  }catch(e){alert("Could not update GitHub: "+e.message)}
+    return true;
+  }catch(e){alert("Could not update GitHub automatically: "+e.message);return false}
+}
+function autoPublish(){
+  publishQueue=publishQueue.then(()=>publishMenuToGitHub()).catch(()=>false);
+  return publishQueue;
 }
 
 const STORAGE_KEY="spice-street-availability-v2";const PRICE_KEY="spice-street-prices-v1";function getPrices(){const s=localStorage.getItem(PRICE_KEY);if(s)return JSON.parse(s);const p={};DISHES.forEach(d=>p[d.id]=d.price);return p}function savePrices(p){localStorage.setItem(PRICE_KEY,JSON.stringify(p));}
 function getAvailability(){const saved=localStorage.getItem(STORAGE_KEY);if(saved)return JSON.parse(saved);const initial={};DISHES.forEach(d=>initial[d.id]=true);initial[2]=false;initial[58]=false;return initial}
 function saveAvailability(state){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 function renderCustomer(){const menu=document.getElementById("menu");if(!menu)return;const state=getAvailability();const prices=getPrices();const groups={};DISHES.forEach(d=>{if(!groups[d.category])groups[d.category]=[];groups[d.category].push(d)});let html="";Object.entries(groups).forEach(([category,dishes])=>{html+='<section class="category-section"><div class="category-heading"><div class="category-icon">'+(CATEGORIES[category]||"🍽️")+'</div><div><h2>'+category+'</h2><p>'+dishes.length+' items</p></div></div><div class="menu-grid">';dishes.forEach(d=>{const a=state[d.id];html+='<article class="menu-card '+(a?"":"sold")+'"><div><div class="category">'+category+'</div><div class="dish-name">'+d.name+'</div><div class="description">'+d.description+'</div><div class="price">₹'+(prices[d.id]??d.price)+'</div></div><div class="badge '+(a?"on":"off")+'">'+(a?"✓ Available":"✕ Sold out")+'</div></article>'});html+="</div></section>"});menu.innerHTML=html}
-function renderAdmin(){const list=document.getElementById("adminMenu");if(!list||!adminApp||adminApp.hidden)return;const state=getAvailability();const prices=getPrices();const available=DISHES.filter(d=>state[d.id]).length;document.getElementById("availableCount").textContent=available;document.getElementById("soldOutCount").textContent=DISHES.length-available;let html="",lastCategory="";DISHES.forEach(d=>{const on=state[d.id];if(lastCategory!==d.category){html+='<div class="admin-category">'+(CATEGORIES[d.category]||"🍽️")+" "+d.category+"</div>";lastCategory=d.category}html+='<div class="admin-row"><div class="admin-info"><div class="admin-food-icon">'+(CATEGORIES[d.category]||"🍽️")+'</div><div><strong>'+d.name+'</strong><div class="price-editor"><span>₹</span><input class="price-input" type="number" min="0" step="1" value="'+(prices[d.id]??d.price)+'" data-price-id="'+d.id+'"><button class="price-save" data-save-price="'+d.id+'">Save</button></div></div></div><button class="toggle '+(on?"on":"off")+'" data-id="'+d.id+'">'+(on?"AVAILABLE":"SOLD OUT")+"</button></div>"});list.innerHTML=html;list.querySelectorAll(".toggle").forEach(b=>b.addEventListener("click",()=>{const s=getAvailability();const id=Number(b.dataset.id);s[id]=!s[id];saveAvailability(s);renderAdmin()}));list.querySelectorAll(".price-save").forEach(b=>b.addEventListener("click",()=>{const id=Number(b.dataset.savePrice);const input=list.querySelector('[data-price-id="'+id+'"]');const value=Math.max(0,Math.round(Number(input.value)));if(!Number.isFinite(value))return;const p=getPrices();p[id]=value;savePrices(p);renderAdmin()}))}
-const publishBtn=document.getElementById("publishBtn");
-const headerPublishBtn=document.getElementById("headerPublishBtn");
-if(publishBtn)publishBtn.addEventListener("click",publishMenuToGitHub);
-if(headerPublishBtn)headerPublishBtn.addEventListener("click",publishMenuToGitHub);
+function renderAdmin(){const list=document.getElementById("adminMenu");if(!list||!adminApp||adminApp.hidden)return;const state=getAvailability();const prices=getPrices();const available=DISHES.filter(d=>state[d.id]).length;document.getElementById("availableCount").textContent=available;document.getElementById("soldOutCount").textContent=DISHES.length-available;let html="",lastCategory="";DISHES.forEach(d=>{const on=state[d.id];if(lastCategory!==d.category){html+='<div class="admin-category">'+(CATEGORIES[d.category]||"🍽️")+" "+d.category+"</div>";lastCategory=d.category}html+='<div class="admin-row"><div class="admin-info"><div class="admin-food-icon">'+(CATEGORIES[d.category]||"🍽️")+'</div><div><strong>'+d.name+'</strong><div class="price-editor"><span>₹</span><input class="price-input" type="number" min="0" step="1" value="'+(prices[d.id]??d.price)+'" data-price-id="'+d.id+'"><button class="price-save" data-save-price="'+d.id+'">Save</button></div></div></div><button class="toggle '+(on?"on":"off")+'" data-id="'+d.id+'">'+(on?"AVAILABLE":"SOLD OUT")+"</button></div>"});list.innerHTML=html;list.querySelectorAll(".toggle").forEach(b=>b.addEventListener("click",()=>{const s=getAvailability();const id=Number(b.dataset.id);s[id]=!s[id];saveAvailability(s);renderAdmin();autoPublish()}));list.querySelectorAll(".price-save").forEach(b=>b.addEventListener("click",()=>{const id=Number(b.dataset.savePrice);const input=list.querySelector('[data-price-id="'+id+'"]');const value=Math.max(0,Math.round(Number(input.value)));if(!Number.isFinite(value))return;const p=getPrices();p[id]=value;savePrices(p);renderAdmin();autoPublish()}))}
 const resetBtn=document.getElementById("resetBtn");
-if(resetBtn)resetBtn.addEventListener("click",()=>{if(confirm("Reset all dishes to available?")){const s={};DISHES.forEach(d=>s[d.id]=true);saveAvailability(s);renderAdmin()}});
+if(resetBtn)resetBtn.addEventListener("click",()=>{if(confirm("Reset all dishes to available?")){const s={};DISHES.forEach(d=>s[d.id]=true);saveAvailability(s);renderAdmin();autoPublish()}});
 window.addEventListener("storage",()=>{renderCustomer();renderAdmin()});
 renderCustomer();renderAdmin();
 async function syncPublishedMenu(){

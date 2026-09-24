@@ -2,6 +2,7 @@ const ALLOWED_ORIGIN = "https://menu.nexgenlink.co.in";
 const GITHUB_API = "https://api.github.com";
 const GITHUB_TOKEN_KEY = "github-token";
 const SESSION_PREFIX = "session:";
+const API_VERSION = "2026-09-24.3";
 
 function corsHeaders(origin) {
   return {
@@ -133,7 +134,7 @@ export default {
     if(request.method==="OPTIONS")return new Response(null,{status:204,headers:corsHeaders(origin)});
     if(origin&&origin!=="https://menu.nexgenlink.co.in")return text("Forbidden origin",403,origin);
     try{
-      if(url.pathname==="/health"&&request.method==="GET"){const token=await env.MENU_SECRETS.get(GITHUB_TOKEN_KEY,{cacheTtl:30});return json({ok:true,githubConfigured:Boolean(token)},200,origin);}
+      if(url.pathname==="/health"&&request.method==="GET"){const token=await env.MENU_SECRETS.get(GITHUB_TOKEN_KEY,{cacheTtl:30});return json({ok:true,apiVersion:API_VERSION,githubConfigured:Boolean(token)},200,origin);}
       if(url.pathname==="/auth/admin"&&request.method==="POST"){
         const b=await readJson(request),u=String(b?.username||"").trim().toLowerCase(),p=String(b?.password||"");
         if(u!=="admin"||!(await sameSecret(u+":"+p,env.ADMIN_CREDENTIAL_SHA256)))return json({ok:false,message:"Incorrect username or passcode."},401,origin);

@@ -745,7 +745,7 @@ function startPolling() {
 
 /* ------------------------------------------------------- GitHub client */
 function centralApiBase() {
-  return String(CONFIG.centralApiBase || "").trim().replace(/\\/+$/, "");
+  return String(CONFIG.centralApiBase || "").trim().replace(/\/+$/, "");
 }
 function hasCentralApi() { return Boolean(centralApiBase()); }
 function centralSessionKey(role) {

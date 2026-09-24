@@ -207,6 +207,7 @@ const GITHUB_USER_KEY = "spice-street-github-user-v1";
 const ADMIN_SESSION = "spice-street-admin-session";
 const CENTRAL_ADMIN_SESSION = "spice-street-central-admin-session";
 const CENTRAL_MASTER_SESSION = "spice-street-central-master-session";
+const FRONTEND_BUILD = "2026-09-24.3";
 
 // Keys used by earlier versions of this app. The published file is now the
 // source of truth, so stale copies are simply dropped.
@@ -799,6 +800,9 @@ async function centralLogin(role, username, password) {
 }
 async function centralStatus() {
   return centralRequest("/status", { method: "GET" });
+}
+async function centralHealth() {
+  return centralRequest("/health", { method: "GET" });
 }
 async function centralPublish(batch) {
   const dishes = {};
@@ -1694,16 +1698,20 @@ function renderMasterAdmin(message, kind) {
     status.textContent = message || "Checking central GitHub connection…";
     const disconnect = $("masterDisconnectBtn");
     if (disconnect) disconnect.hidden = true;
-    centralStatus().then(result => {
-      if (message) return;
+    Promise.all([centralStatus(), centralHealth()]).then(([result, health]) => {
+      const build = "Admin UI " + FRONTEND_BUILD + " · API " + (health.apiVersion || "unknown");
+      if (message) {
+        status.textContent = message + " · " + build;
+        return;
+      }
       status.className = "sync-message " + (result.githubConfigured ? "ok" : "");
-      status.textContent = result.githubConfigured
+      status.textContent = (result.githubConfigured
         ? "GitHub token is connected centrally. Admin works from any device."
-        : "No central GitHub token is connected. Connect one here.";
+        : "No central GitHub token is connected. Connect one here.") + " · " + build;
     }).catch(err => {
       if (!message) {
         status.className = "sync-message err";
-        status.textContent = err.message || "Could not reach the central publishing service.";
+        status.textContent = (err.message || "Could not reach the central publishing service.") + " · Admin UI " + FRONTEND_BUILD;
       }
     });
     return;
@@ -1762,7 +1770,7 @@ async function masterConnectGitHub(token) {
       renderMasterAdmin("GitHub connected. This device is now configured. Normal Admin login will work here from now on.", "ok");
     }
   } catch (err) {
-    renderMasterAdmin(err.message || "Could not verify the GitHub token.", "err");
+    renderMasterAdmin((err.message || "Could not verify the GitHub token.") + " · Admin UI " + FRONTEND_BUILD, "err");
   } finally {
     if (btn) btn.disabled = false;
   }

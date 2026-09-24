@@ -207,7 +207,7 @@ const GITHUB_USER_KEY = "spice-street-github-user-v1";
 const ADMIN_SESSION = "spice-street-admin-session";
 const CENTRAL_ADMIN_SESSION = "spice-street-central-admin-session";
 const CENTRAL_MASTER_SESSION = "spice-street-central-master-session";
-const FRONTEND_BUILD = "2026-09-24.3";
+const FRONTEND_BUILD = "2026-09-24.4";
 
 // Keys used by earlier versions of this app. The published file is now the
 // source of truth, so stale copies are simply dropped.

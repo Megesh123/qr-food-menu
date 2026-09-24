@@ -34,17 +34,40 @@ function githubHeaders(token) {
 }
 async function verifyGithubToken(token, repo) {
   const headers = githubHeaders(token);
-  // Validate the token against the exact file this service must publish.
-  // This matches the real write path and only requires Contents read access
-  // for validation; the configured PAT should additionally have Contents write.
+  // Validate repository access first, then validate the exact file this service publishes.
+  // Never return or log the token itself.
+  const repoResponse = await fetch(GITHUB_API+"/repos/"+repo,{headers,cache:"no-store"});
+  const repoBody = await repoResponse.json().catch(()=>({}));
+  if (!repoResponse.ok) {
+    const detail = repoBody.message || "The token cannot access this repository.";
+    const accepted = repoResponse.headers.get("X-Accepted-GitHub-Permissions") || "";
+    const sso = repoResponse.headers.get("X-GitHub-SSO") || "";
+    const rate = repoResponse.headers.get("X-RateLimit-Remaining") || "";
+    const parts = [
+      "GitHub repository check failed (HTTP "+repoResponse.status+"): "+detail,
+      accepted ? "Required permissions: "+accepted+"." : "",
+      sso ? "GitHub SSO response: "+sso+"." : "",
+      rate ? "GitHub API remaining requests: "+rate+"." : ""
+    ].filter(Boolean);
+    const e = new Error(parts.join(" "));
+    e.status = repoResponse.status;
+    throw e;
+  }
   const url = repoUrl(repo,"menu-data.json")+"?ref=main";
   const res = await fetch(url,{headers,cache:"no-store"});
   const body = await res.json().catch(()=>({}));
   if (!res.ok) {
     const detail = body.message || "The token cannot access the repository contents.";
     const accepted = res.headers.get("X-Accepted-GitHub-Permissions") || "";
-    const suffix = accepted ? " Required by GitHub: "+accepted+"." : "";
-    const e = new Error("GitHub token check failed (HTTP "+res.status+"): "+detail+suffix);
+    const sso = res.headers.get("X-GitHub-SSO") || "";
+    const rate = res.headers.get("X-RateLimit-Remaining") || "";
+    const parts = [
+      "GitHub contents check failed (HTTP "+res.status+"): "+detail,
+      accepted ? "Required permissions: "+accepted+"." : "",
+      sso ? "GitHub SSO response: "+sso+"." : "",
+      rate ? "GitHub API remaining requests: "+rate+"." : ""
+    ].filter(Boolean);
+    const e = new Error(parts.join(" "));
     e.status = res.status;
     throw e;
   }

@@ -33,17 +33,21 @@ function githubHeaders(token) {
 }
 async function verifyGithubToken(token, repo) {
   const headers = githubHeaders(token);
-  // Validate the token against the selected repository directly. A
-  // repository-scoped fine-grained PAT does not need user permissions.
-  const repoRes = await fetch(GITHUB_API+"/repos/"+repo,{headers,cache:"no-store"});
-  const repoBody = await repoRes.json().catch(()=>({}));
-  if (!repoRes.ok) {
-    const detail = repoBody.message || "The token cannot access "+repo+".";
-    const e = new Error("GitHub rejected the token (HTTP "+repoRes.status+"): "+detail);
-    e.status = repoRes.status;
+  // Validate the token against the exact file this service must publish.
+  // This matches the real write path and only requires Contents read access
+  // for validation; the configured PAT should additionally have Contents write.
+  const url = repoUrl(repo,"menu-data.json")+"?ref=main";
+  const res = await fetch(url,{headers,cache:"no-store"});
+  const body = await res.json().catch(()=>({}));
+  if (!res.ok) {
+    const detail = body.message || "The token cannot access the repository contents.";
+    const accepted = res.headers.get("X-Accepted-GitHub-Permissions") || "";
+    const suffix = accepted ? " Required by GitHub: "+accepted+"." : "";
+    const e = new Error("GitHub token check failed (HTTP "+res.status+"): "+detail+suffix);
+    e.status = res.status;
     throw e;
   }
-  return repoBody?.owner?.login || "";
+  return repo;
 }
 async function getSession(request, env, role) {
   const h=request.headers.get("Authorization")||"";

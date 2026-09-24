@@ -162,6 +162,9 @@ const CONFIG = Object.assign({
   branch: "main",                   // branch GitHub Pages deploys from
   dataPath: "menu-data.json",       // published menu file inside the repo
   apiBase: "https://api.github.com",
+  // When configured, GitHub publishing is centralized in the server-side Worker.
+  // Leave empty until the Worker is deployed; local-token mode remains as fallback.
+  centralApiBase: "",
   publishDebounceMs: 2500,          // wait for more clicks before committing
   publishMaxWaitMs: 8000,           // ...but never wait longer than this
   customerPollMs: 60 * 1000,        // how often the customer menu re-checks
@@ -195,6 +198,8 @@ const GITHUB_TOKEN_KEY = "spice-street-github-token-v2";
 const DEVICE_SETUP_KEY = "spice-street-device-configured-v1";
 const GITHUB_USER_KEY = "spice-street-github-user-v1";
 const ADMIN_SESSION = "spice-street-admin-session";
+const CENTRAL_ADMIN_SESSION = "spice-street-central-admin-session";
+const CENTRAL_MASTER_SESSION = "spice-street-central-master-session";
 
 // Keys used by earlier versions of this app. The published file is now the
 // source of truth, so stale copies are simply dropped.
@@ -739,6 +744,82 @@ function startPolling() {
 }
 
 /* ------------------------------------------------------- GitHub client */
+function centralApiBase() {
+  return String(CONFIG.centralApiBase || "").trim().replace(/\\/+$/, "");
+}
+function hasCentralApi() { return Boolean(centralApiBase()); }
+function centralSessionKey(role) {
+  return role === "master" ? CENTRAL_MASTER_SESSION : CENTRAL_ADMIN_SESSION;
+}
+function getCentralSession(role) {
+  try { return sessionStorage.getItem(centralSessionKey(role)) || ""; } catch (e) { return ""; }
+}
+function setCentralSession(role, token) {
+  try {
+    if (token) sessionStorage.setItem(centralSessionKey(role), token);
+    else sessionStorage.removeItem(centralSessionKey(role));
+  } catch (e) {}
+}
+async function centralRequest(path, options = {}, role) {
+  if (!hasCentralApi()) throw new PublishError("Central publishing API is not configured.", { status: 503, retryable: true });
+  const headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
+  const session = role ? getCentralSession(role) : "";
+  if (session) headers.Authorization = "Bearer " + session;
+  let res;
+  try {
+    res = await fetch(centralApiBase() + path, Object.assign({ cache: "no-store" }, options, { headers }));
+  } catch (e) {
+    throw new PublishError("Could not reach the central publishing service.", { retryable: true });
+  }
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new PublishError(body && body.message ? body.message : "Central publishing service returned HTTP " + res.status, {
+      status: res.status,
+      auth: res.status === 401,
+      retryable: res.status >= 500 || res.status === 429
+    });
+    throw err;
+  }
+  return body;
+}
+async function centralLogin(role, username, password) {
+  const body = await centralRequest("/auth/" + role, {
+    method: "POST",
+    body: JSON.stringify({ username, password })
+  });
+  if (!body || !body.sessionToken) throw new PublishError("Central sign-in did not return a session.", { status: 500 });
+  return body.sessionToken;
+}
+async function centralStatus() {
+  return centralRequest("/status", { method: "GET" });
+}
+async function centralPublish(batch) {
+  const dishes = {};
+  DISHES.forEach(d => { dishes[d.id] = d; });
+  return centralRequest("/publish", {
+    method: "POST",
+    body: JSON.stringify({
+      repo: CONFIG.repo,
+      branch: CONFIG.branch,
+      dataPath: CONFIG.dataPath,
+      batch,
+      dishes,
+      state: loadState()
+    })
+  }, "admin").then(body => body.result);
+}
+async function centralConfigureGitHub(token) {
+  return centralRequest("/configure/github", {
+    method: "POST",
+    body: JSON.stringify({ token, repo: CONFIG.repo })
+  }, "master");
+}
+async function centralSaveAnalytics(code) {
+  return centralRequest("/analytics", {
+    method: "POST",
+    body: JSON.stringify({ repo: CONFIG.repo, branch: CONFIG.branch, path: ANALYTICS_CONFIG_PATH, code })
+  }, "master");
+}
 class PublishError extends Error {
   constructor(message, { status = 0, retryable = false, auth = false } = {}) {
     super(message);
@@ -971,7 +1052,7 @@ const publisher = {
   // Called after every admin change.
   schedule() {
     if (!IS_ADMIN || !this.hasPending()) return;
-    if (!getToken()) { this.setStatus("disconnected", "GitHub publishing is managed by Master Admin."); return; }
+    if (hasCentralApi() ? !getCentralSession("admin") : !getToken()) { this.setStatus("disconnected", hasCentralApi() ? "Sign in to Admin to publish menu changes." : "GitHub publishing is managed by Master Admin."); return; }
     if (navigator.onLine === false) { this.setStatus("offline"); return; }
     if (this.inFlight) { this.rerun = true; return; }
     this.setStatus("pending");
@@ -986,7 +1067,10 @@ const publisher = {
     if (this.inFlight) { this.rerun = true; return; }
     if (!this.hasPending()) return;
     const token = getToken();
-    if (!token) { this.setStatus("disconnected", "GitHub publishing is managed by Master Admin."); return; }
+    if (hasCentralApi() ? !getCentralSession("admin") : !token) {
+      this.setStatus("disconnected", hasCentralApi() ? "Admin session expired. Sign in again." : "GitHub publishing is managed by Master Admin.");
+      return;
+    }
     if (navigator.onLine === false) { this.setStatus("offline"); return; }
 
     const batch = this.pending;
@@ -994,17 +1078,22 @@ const publisher = {
     this.inFlight = true;
     this.setStatus("publishing");
     try {
-      const result = await publishToGitHub(token, batch, {
-        onAttempt: n => { if (n > 0) this.setStatus("publishing", "Someone else just updated the menu – merging and retrying…"); }
-      });
+      const result = hasCentralApi()
+        ? await centralPublish(batch)
+        : await publishToGitHub(token, batch, {
+            onAttempt: n => { if (n > 0) this.setStatus("publishing", "Someone else just updated the menu – merging and retrying…"); }
+          });
+      const normalizedResult = hasCentralApi()
+        ? { state: stateFromItems(result.items, result.updatedAt), commitSha: result.commitSha, commitUrl: result.commitUrl }
+        : result;
       // The published state is now the truth; keep any clicks made meanwhile on top.
-      const merged = applyPatch(result.state, this.pending);
-      merged.updatedAt = result.state.updatedAt;
+      const merged = applyPatch(normalizedResult.state, this.pending);
+      merged.updatedAt = normalizedResult.state.updatedAt;
       saveState(merged);
       this.retryCount = 0;
       this.publishedAt = Date.now();
-      this.lastPublishedUpdatedAt = result.state.updatedAt;
-      this.lastCommitUrl = result.commitUrl || "";
+      this.lastPublishedUpdatedAt = normalizedResult.state.updatedAt;
+      this.lastCommitUrl = normalizedResult.commitUrl || "";
       this.inFlight = false;
       this.setStatus("published");
       if (lastAddedDishName) {
@@ -1017,9 +1106,14 @@ const publisher = {
       this.persistPending();
       this.inFlight = false;
       if (err.auth) {
-        setToken("");
-        this.setStatus("disconnected", "GitHub connection expired. Master Admin must renew the token.");
-        if (lastAddedDishName) setAddDishMessage(lastAddedDishName + " is waiting for the GitHub connection.", "err");
+        if (hasCentralApi()) {
+          setCentralSession("admin", "");
+          this.setStatus("disconnected", "Admin session expired or GitHub access needs attention. Sign in again or ask Master Admin to renew the token.");
+        } else {
+          setToken("");
+          this.setStatus("disconnected", "GitHub connection expired. Master Admin must renew the token.");
+        }
+        if (lastAddedDishName) setAddDishMessage(lastAddedDishName + " is waiting for the publishing connection.", "err");
       } else {
         this.setStatus("error", err.message || "Could not publish to GitHub.");
         if (lastAddedDishName) setAddDishMessage(lastAddedDishName + " could not be published yet.", "err");
@@ -1172,7 +1266,7 @@ function setTokenMessage(text, kind) {
 function renderSyncStatus() {
   const title = $("syncTitle"), detail = $("syncDetail"), dot = $("syncDot");
   if (!title || !detail || !dot) return;
-  const token = getToken();
+  const token = hasCentralApi() ? getCentralSession("admin") : getToken();
   const pending = publisher.pendingCount();
   let status = publisher.status;
   if (!token) status = "disconnected";
@@ -1292,22 +1386,37 @@ async function submitLogin() {
   } catch (err) {
     ok = false;
   }
+  if (ok && hasCentralApi()) {
+    try {
+      const session = await centralLogin("admin", username, passcode);
+      setCentralSession("admin", session);
+    } catch (err) {
+      if (passField) passField.value = "";
+      if (button) { button.disabled = false; button.textContent = "Sign in"; }
+      if (error) error.textContent = err.message || "Central publishing service sign-in failed.";
+      return false;
+    }
+  }
+
   if (passField) passField.value = "";           // never leave it in the DOM
   if (button) { button.disabled = false; button.textContent = "Sign in"; }
 
   if (ok) {
-    // Existing devices that already have a verified GitHub token are treated as configured.
-    if (getToken()) setDeviceConfigured(true);
-    if (!isDeviceConfigured()) {
-      if (error) error.textContent = "This device needs one-time setup by Master Admin. Open Master Admin and connect GitHub on this device."; 
-      return false;
+    if (!hasCentralApi()) {
+      // Legacy fallback: existing devices that already have a verified GitHub token
+      // are treated as configured.
+      if (!hasCentralApi() && getToken()) setDeviceConfigured(true);
+      if (!isDeviceConfigured()) {
+        if (error) error.textContent = "This device needs one-time setup by Master Admin. Open Master Admin and connect GitHub on this device.";
+        return false;
+      }
     }
     writeAttempts({ count: 0, lockedUntil: 0 });
     stopLockoutTicker();
     sessionStorage.setItem(ADMIN_SESSION, "true");
     adminLogin.hidden = true; adminApp.hidden = false;
     if (error) error.textContent = "";
-renderAdmin();
+    renderAdmin();
     afterAdminVisible();
     return true;
   }
@@ -1480,7 +1589,22 @@ function initAdmin() {
 let adminStarted = false;
 function afterAdminVisible() {
   if (adminStarted) return;
-  if (!isDeviceConfigured()) { return; }
+  if (hasCentralApi()) {
+    if (!getCentralSession("admin")) return;
+    adminStarted = true;
+    publisher.setStatus("idle");
+    if (publisher.hasPending()) publisher.schedule();
+    else centralStatus().then(() => renderSyncStatus()).catch(err => {
+      if (err.auth) {
+        setCentralSession("admin", "");
+        publisher.setStatus("disconnected", "Admin session expired. Sign in again.");
+      } else {
+        renderSyncStatus();
+      }
+    });
+    return;
+  }
+  if (!isDeviceConfigured()) return;
   adminStarted = true;
   const token = getToken();
   if (!token) { publisher.setStatus("disconnected", "GitHub publishing is managed by Master Admin."); return; }
@@ -1521,6 +1645,17 @@ async function submitMasterLogin() {
   if (button) { button.disabled = true; button.textContent = "Checking…"; }
   let ok = false;
   try { ok = sameDigest(await hashCredentials(username, passcode), MASTER_CREDENTIAL_SHA256); } catch (e) {}
+  if (ok && hasCentralApi()) {
+    try {
+      const session = await centralLogin("master", username, passcode);
+      setCentralSession("master", session);
+    } catch (err) {
+      if ($("masterPassword")) $("masterPassword").value = "";
+      if (button) { button.disabled = false; button.textContent = "Sign in"; }
+      masterLoginError(err.message || "Central publishing service sign-in failed.");
+      return false;
+    }
+  }
   if ($("masterPassword")) $("masterPassword").value = "";
   if (button) { button.disabled = false; button.textContent = "Sign in"; }
   if (ok) {
@@ -1547,6 +1682,25 @@ async function submitMasterLogin() {
 function renderMasterAdmin(message, kind) {
   const status = $("masterStatus");
   if (!status) return;
+  if (hasCentralApi()) {
+    status.className = "sync-message " + (kind || "");
+    status.textContent = message || "Checking central GitHub connection…";
+    const disconnect = $("masterDisconnectBtn");
+    if (disconnect) disconnect.hidden = true;
+    centralStatus().then(result => {
+      if (message) return;
+      status.className = "sync-message " + (result.githubConfigured ? "ok" : "");
+      status.textContent = result.githubConfigured
+        ? "GitHub token is connected centrally. Admin works from any device."
+        : "No central GitHub token is connected. Connect one here.";
+    }).catch(err => {
+      if (!message) {
+        status.className = "sync-message err";
+        status.textContent = err.message || "Could not reach the central publishing service.";
+      }
+    });
+    return;
+  }
   const token = getToken();
   status.className = "sync-message " + (kind || (token ? "ok" : ""));
   status.textContent = message || (token
@@ -1557,21 +1711,25 @@ function renderMasterAdmin(message, kind) {
 }
 async function saveAnalyticsCode(code) {
   code = String(code || "").trim().replace(/^https?:\/\//, "").split(".")[0];
-  const token = getToken();
-  if (!token) { renderMasterAdmin("Connect a GitHub token first.", "err"); return; }
   if (!/^[a-z0-9_-]+$/i.test(code)) { renderMasterAdmin("Enter the GoatCounter site code only, for example: abcd1234.", "err"); return; }
   try {
-    const url = contentsUrl().replace(CONFIG.dataPath, ANALYTICS_CONFIG_PATH);
-    let sha = "";
-    try {
-      const existing = await ghFetch(url + "?ref=" + encodeURIComponent(CONFIG.branch), token);
-      const file = await existing.json();
-      sha = file.sha || "";
-    } catch (e) {}
-    const payload = JSON.stringify({ version: 1, provider: "goatcounter", code }, null, 2) + "\n";
-    const body = { message: "analytics: configure visitor monitor", content: utf8ToBase64(payload), branch: CONFIG.branch };
-    if (sha) body.sha = sha;
-    await ghFetch(url, token, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (hasCentralApi()) {
+      await centralSaveAnalytics(code);
+    } else {
+      const token = getToken();
+      if (!token) { renderMasterAdmin("Connect a GitHub token first.", "err"); return; }
+      const url = contentsUrl().replace(CONFIG.dataPath, ANALYTICS_CONFIG_PATH);
+      let sha = "";
+      try {
+        const existing = await ghFetch(url + "?ref=" + encodeURIComponent(CONFIG.branch), token);
+        const file = await existing.json();
+        sha = file.sha || "";
+      } catch (e) {}
+      const payload = JSON.stringify({ version: 1, provider: "goatcounter", code }, null, 2) + "\n";
+      const body = { message: "analytics: configure visitor monitor", content: utf8ToBase64(payload), branch: CONFIG.branch };
+      if (sha) body.sha = sha;
+      await ghFetch(url, token, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    }
     analyticsConfig = { provider: "goatcounter", code };
     renderMasterAdmin("Visitor monitor connected to GoatCounter: " + code + ".", "ok");
   } catch (err) { renderMasterAdmin(err.message || "Could not save analytics settings.", "err"); }
@@ -1584,19 +1742,29 @@ async function masterConnectGitHub(token) {
   if (btn) btn.disabled = true;
   renderMasterAdmin("Checking GitHub token…");
   try {
-    const login = await verifyToken(token);
-    setToken(token, login);
-    setDeviceConfigured(true);
-    if ($("masterTokenInput")) $("masterTokenInput").value = "";
-    renderMasterAdmin("GitHub connected. This device is now configured. Normal Admin login will work here from now on.", "ok");
+    if (hasCentralApi()) {
+      if (!getCentralSession("master")) throw new PublishError("Master Admin session expired. Sign in again.", { status: 401, auth: true });
+      const result = await centralConfigureGitHub(token);
+      if ($("masterTokenInput")) $("masterTokenInput").value = "";
+      renderMasterAdmin("GitHub connected centrally" + (result.githubUser ? " as @" + result.githubUser : "") + ". Admin now works from any device.", "ok");
+    } else {
+      const login = await verifyToken(token);
+      setToken(token, login);
+      setDeviceConfigured(true);
+      if ($("masterTokenInput")) $("masterTokenInput").value = "";
+      renderMasterAdmin("GitHub connected. This device is now configured. Normal Admin login will work here from now on.", "ok");
+    }
   } catch (err) {
     renderMasterAdmin(err.message || "Could not verify the GitHub token.", "err");
   } finally {
     if (btn) btn.disabled = false;
-    renderMasterAdmin();
   }
 }
 function masterDisconnectGitHub() {
+  if (hasCentralApi()) {
+    renderMasterAdmin("Central GitHub connection is managed by the publishing service.", "");
+    return;
+  }
   setToken("");
   renderMasterAdmin("GitHub token disconnected. Normal Admin changes will wait until Master Admin connects a token.", "");
 }

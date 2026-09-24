@@ -3,6 +3,13 @@
    -------------------------------------------------------------------------
    One script shared by the landing page, the customer menu and the admin
    dashboard.
+   ========================================================================= */
+
+/* =========================================================================
+   Spice Street – QR menu
+   -------------------------------------------------------------------------
+   One script shared by the landing page, the customer menu and the admin
+   dashboard.
 
    How live updates work
    ---------------------
@@ -164,7 +171,7 @@ const CONFIG = Object.assign({
   apiBase: "https://api.github.com",
   // When configured, GitHub publishing is centralized in the server-side Worker.
   // Leave empty until the Worker is deployed; local-token mode remains as fallback.
-  centralApiBase: "",
+  centralApiBase: "https://spice-street-menu-api.megeshwaranmr.workers.dev",
   publishDebounceMs: 2500,          // wait for more clicks before committing
   publishMaxWaitMs: 8000,           // ...but never wait longer than this
   customerPollMs: 60 * 1000,        // how often the customer menu re-checks

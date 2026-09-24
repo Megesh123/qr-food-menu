@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T12:48:39.028Z",
+  "updatedAt": "2026-09-24T03:56:39.024Z",
   "items": [
     {
       "id": 1,
@@ -9,7 +9,7 @@
       "price": 120,
       "description": "Basmati rice, chicken and aromatic spices.",
       "veg": false,
-      "available": true
+      "available": false
     },
     {
       "id": 2,

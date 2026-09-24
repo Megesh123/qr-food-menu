@@ -2,7 +2,7 @@ const ALLOWED_ORIGIN = "https://menu.nexgenlink.co.in";
 const GITHUB_API = "https://api.github.com";
 const GITHUB_TOKEN_KEY = "github-token";
 const SESSION_PREFIX = "session:";
-const API_VERSION = "2026-09-24.3";
+const API_VERSION = "2026-09-24.4";
 
 function corsHeaders(origin) {
   return {
@@ -34,8 +34,28 @@ function githubHeaders(token) {
 }
 async function verifyGithubToken(token, repo) {
   const headers = githubHeaders(token);
-  // Validate repository access first, then validate the exact file this service publishes.
-  // Never return or log the token itself.
+  // Identify the GitHub account behind the token first. /user requires no
+  // fine-grained repository permission and never exposes the token itself.
+  const userResponse = await fetch(GITHUB_API+"/user",{headers,cache:"no-store"});
+  const userBody = await userResponse.json().catch(()=>({}));
+  if (!userResponse.ok) {
+    const detail = userBody.message || "GitHub rejected the token authentication.";
+    const rate = userResponse.headers.get("X-RateLimit-Remaining") || "";
+    const parts = [
+      "GitHub token authentication failed (HTTP "+userResponse.status+"): "+detail,
+      rate ? "GitHub API remaining requests: "+rate+"." : ""
+    ].filter(Boolean);
+    const e = new Error(parts.join(" "));
+    e.status = userResponse.status;
+    throw e;
+  }
+  const githubLogin = String(userBody.login || "").trim();
+  if (!githubLogin) {
+    const e = new Error("GitHub authenticated the token but did not return an account login.");
+    e.status = 502;
+    throw e;
+  }
+  // Now validate repository access, then validate the exact file this service publishes.
   const repoResponse = await fetch(GITHUB_API+"/repos/"+repo,{headers,cache:"no-store"});
   const repoBody = await repoResponse.json().catch(()=>({}));
   if (!repoResponse.ok) {
@@ -71,7 +91,7 @@ async function verifyGithubToken(token, repo) {
     e.status = res.status;
     throw e;
   }
-  return repo;
+  return githubLogin;
 }
 async function getSession(request, env, role) {
   const h=request.headers.get("Authorization")||"";

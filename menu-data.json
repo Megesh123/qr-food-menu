@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-24T06:13:06.471Z",
+  "updatedAt": "2026-09-24T06:14:11.793Z",
   "items": [
     {
       "id": 1,
@@ -63,7 +63,7 @@
       "price": 110,
       "description": "Crispy, spicy South Indian chicken starter.",
       "veg": false,
-      "available": true
+      "available": false
     },
     {
       "id": 8,
@@ -72,7 +72,7 @@
       "price": 100,
       "description": "Crispy paneer tossed with Indian spices.",
       "veg": true,
-      "available": true
+      "available": false
     },
     {
       "id": 9,
@@ -81,7 +81,7 @@
       "price": 150,
       "description": "Crispy chicken wings coated in spicy masala.",
       "veg": false,
-      "available": true
+      "available": false
     },
     {
       "id": 10,
@@ -90,7 +90,7 @@
       "price": 90,
       "description": "Crispy cauliflower with chilli and curry leaves.",
       "veg": true,
-      "available": true
+      "available": false
     },
     {
       "id": 11,
@@ -99,7 +99,7 @@
       "price": 100,
       "description": "Mushroom tossed with cracked pepper and onions.",
       "veg": true,
-      "available": true
+      "available": false
     },
     {
       "id": 12,
